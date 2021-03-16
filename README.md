@@ -1,6 +1,6 @@
 # Content
 
-This repository contains bits and pieces that I made while trying to figure out how the Raspberry Pi Pico state machines and the Programmable Input/Output (PIO) works.
+This repository contains bits and pieces that I made while trying to figure out how the Raspberry Pi Pico state machines and the Programmable Input/Output (PIO) work.
 
 [Here](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/handy_bits_and_pieces) I have written down the reusable 'tricks' I use in several of the projects listed below.
 
