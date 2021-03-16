@@ -1,0 +1,36 @@
+; The output (pins) is the debounced input (pin)
+
+.program button_debounce
+
+    jmp pin isone   ; executed only once: is the pin currently 0 or 1?
+iszero:
+    wait 1 pin 0    ; the pin is 0, wait for it to become 1
+    set x 31        ; prepare to test the pin for 31 * 2 clock cycles
+checkzero:
+    jmp pin stillone; check if the pin is still 1
+    jmp iszero      ; if the pin has returned to 0, start over
+stillone:
+    jmp x-- checkzero; the decrease the time to wait, or decide it has definitively become 1
+isone:
+    wait 0 pin 0    ; the pin is 1, wait for it to become 0
+    set x 31        ; prepare to test the pin for 31 8 2 clock cycles
+checkone:
+    jmp pin isone   ; if the pin has returned to 1, start over
+    jmp x-- checkone; decrease the time to wait
+    jmp iszero      ; the pin has definitively become 0
+
+
+; Explanation:
+; - start with the assumption that the pin is in a steady state. 
+;   If it is currently 1, then go to 'isone'; if it is currently 0, then go to 'iszero'
+; - the branch of 'isone' works as follows:
+;     wait for a change to 0
+;     if that happens, set 31 into the x scratch register
+;         this is the amount of 'time' the debouncer will wait before switching over
+;         the actual amount of time is also dependent on the clock divisor
+;     the program keeps checking if the input changes back to 1, if so, start over at 'isone'
+;     if the input does not change back, complete the loop of counting down from 31
+;     if the x scratch register becomes 0, the signal has definitively switched to 0:
+;         start from 'iszero'
+; - the branch of 'iszero' works similarly, but the jmp pin statement jumps on 1, not 0
+; - if (offset+1 <= pc < offset+isone) the value is 0, if (pc >= offset+isone) the value is 1

@@ -1,0 +1,18 @@
+; in the c-program the 'set' pins are the 4 output pins to the 4x4 button matrix
+; in the c-program the 'in' pins are the 4 input pins from the 4x4 button matrix, these are pulled_down
+
+.program button_matrix
+
+start:
+    set pins 1 [31]  ; set 0001 on the 4 output pins (activate first row) and wait for the signal to stabilize
+    in pins 4        ; shift the input pins into the ISR
+    set pins 2 [31]  ; set 0010 on the 4 output pins (activate second row) and wait for the signal to stabilize
+    in pins 4        ; shift the input pins into the ISR
+    set pins 4 [31]  ; set 0100 on the 4 output pins (activate third row) and wait for the signal to stabilize
+    in pins 4        ; shift the input pins into the ISR
+    set pins 8 [31]  ; set 1000 on the 4 output pins (activate fourth row) and wait for the signal to stabilize
+    in pins 4        ; shift the input pins into the ISR
+    mov x ISR        ; copy the ISR into the x scratch register
+    jmp !x start     ; if the x contains 0, no key was pressed, start over
+    push noblock     ; a key was pressed, push the ISR into the RX FIFO
+    jmp start        ; start over
