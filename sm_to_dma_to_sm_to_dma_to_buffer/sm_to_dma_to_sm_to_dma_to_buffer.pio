@@ -1,0 +1,33 @@
+// Note: 
+// program tester1 is 4 instructions (intentionally not using .wrap) while program tester0 is only 3 instructions per loop.
+// These program lengths influences the dreq settings of the c program
+// If tester1 is slower than tester0:
+//        // let writing to sm1 determine the speed
+//        channel_config_set_dreq(&dma_conf_2, pio_get_dreq(pio, sm1, true));
+// If tester0 is slower than tester1 (remove the ';' before [31] in tester0):
+//        // let writing to sm0 determine the speed if sm0 is slower than sm1
+//        channel_config_set_dreq(&dma_conf_2, pio_get_dreq(pio, sm0, false));
+
+
+
+.program tester0
+// a simple counter producing output starting from 0
+start0:
+    mov x ~NULL         ; set x to 0xFFFFFFFF
+push_it0:
+    mov ISR ~x          ; set the ISR to ~x (bitwise invert)
+    push        ;[31]   ; push to FIFO (optionally make tester0 slower than tester1, the dreq needs to change)
+    jmp x-- push_it0    ; decrease x and loop
+    jmp start0
+
+
+.program tester1
+// pull and immediately push. Indeed, it does nothing!
+start1:
+    pull                ; pull the Tx FIFO
+    mov ISR OSR         ; do nothing but copy the OSR to the ISR
+    push                ; push the Rx FIFO
+    jmp start1          ; loop
+
+
+ 

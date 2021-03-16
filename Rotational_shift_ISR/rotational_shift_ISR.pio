@@ -1,0 +1,32 @@
+/*
+    I was playing with the instruction `IN ISR <Bit count>` and wanted to make
+    a rotational shifter. For right-shifting this works fine, but for left-shifting
+    two instructions `mov ISR :: ISR` are required.
+*/
+
+.program rotational_shift_ISR
+.wrap_target
+    pull block        ; get a value to shift around
+    mov ISR OSR       ; put it in the ISR
+    mov y ISR         ; save the ISR
+    push block        ; push the starting value back to the user program
+    mov ISR y         ; restore the ISR
+ 
+    set x 31          ; prepare to do a full rotation to the right
+loop_right:
+    in ISR 1          ; shift to right
+    mov y ISR         ; save the ISR
+    push block        ; the ISR is cleared
+    mov ISR y         ; restore the ISR
+    jmp x-- loop_right
+
+    set x 31          ; prepare to do a full rotation to the left
+loop_left:
+    mov ISR :: ISR    ; reverse bit order in ISR
+    in ISR 1          ; shift right (but after the next reverse its actually left)
+    mov ISR :: ISR    ; reverse bit order in ISR
+    mov y ISR         ; save the ISR
+    push block        ; the ISR is cleared
+    mov ISR y         ; restore the ISR
+    jmp x-- loop_left    
+.wrap

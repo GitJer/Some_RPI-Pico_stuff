@@ -1,0 +1,13 @@
+
+.program sm_to_dma_to_buffer
+
+start0:
+    mov x ~NULL         ; start with 0xFFFFFFFF
+push_it0:
+    mov ISR ~x          ; push the value into the Rx FIFO 
+                        ; (make it look like counting up)
+    push 
+    jmp x-- push_it0    ; count down
+    jmp start0
+
+ 

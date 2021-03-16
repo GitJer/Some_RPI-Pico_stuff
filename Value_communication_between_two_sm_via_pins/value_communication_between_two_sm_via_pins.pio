@@ -1,0 +1,29 @@
+
+.program tester0
+
+.wrap_target
+    set pins 0      ; set output on pin to 0 (this is read by tester1, see below)
+    mov ISR NULL    ; signal this to the c++ program via the Rx FIFO
+    push block      
+    irq wait 0      ; wait for the other sm to read the value of the pin
+    
+    set pins 1      ; the same as above, but now for the value 1
+    set x 1         ; push 1 into the ISR and then Rx FIFO
+    mov ISR x
+    push block
+    irq wait 0
+.wrap
+
+
+.program tester1
+
+.wrap_target
+    wait irq 0      ; wait for the other sm to set a value on the pin
+    in pins 1       ; read the value
+    push block      ; signal this to the c++ program via the FIFO
+    irq clear 0     ; clear the irq
+.wrap
+
+
+
+ 

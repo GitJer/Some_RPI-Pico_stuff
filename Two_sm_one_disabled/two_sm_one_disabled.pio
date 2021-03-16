@@ -1,0 +1,25 @@
+
+.program tester0
+
+start0:
+    mov x ~NULL         ; start with 0xFFFFFFFF
+push_it0:
+    mov ISR ~x          ; push the value into the Rx FIFO 
+                        ; (make it look like counting up)
+    push block
+    jmp x-- push_it0    ; count down
+    jmp start0
+
+.program tester1
+
+start1:
+    set x 31            ; start with 31
+push_it1:
+    mov ISR x           ; push the x value into the Rx FIFO
+    push block
+    jmp x-- push_it1    ; count down
+    jmp start1
+
+
+
+ 
