@@ -2,7 +2,7 @@
 
 Most microcontrollers have hardware to produce Pulse Width Modulation (PWM) signals. But sometimes it is useful to be able to read PWM signals and determine the period, pulse width and duty cycle.
 
-Based on the method to measure pulses with PIO code as described [here](https://github.com/GitJer/HC-SR04), a PWM Input can be made.
+Based on the method to measure pulses with PIO code as described [here](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/HCSR04), a PWM Input can be made.
 
 ## Algorithm
 
