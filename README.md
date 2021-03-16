@@ -2,7 +2,7 @@
 
 This repository contains bits and pieces that I made while trying to figure out how the Raspberry Pi Pico state machines and the Programmable Input/Output (PIO) works.
 
-Here I have written down the reusable 'tricks' I use in several of the projects listed below.
+[Here](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/handy_bits_and_pieces) I have written down the reusable 'tricks' I use in several of the projects listed below.
 
 The following projects are contained in this repository:
 
@@ -39,5 +39,5 @@ Most microcontrollers have hardware to produce Pulse Width Modulation (PWM) sign
 ## Rotary encoder using PIO code
 This software reads an optical rotary encoder with very clean signals on its output using PIO code.
 
-# HC-SR04 using the PIO code
+## HC-SR04 using the PIO code
 This code reads the HC-SR04, an ultrasonic distance measurement unit.
