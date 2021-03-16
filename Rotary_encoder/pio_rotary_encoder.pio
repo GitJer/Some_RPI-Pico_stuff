@@ -1,0 +1,51 @@
+
+.program pio_rotary_encoder
+.wrap_target
+.origin 0        ; The jump table has to start at 0
+                 ; it contains the correct jumps for each of the 16  
+                 ; combination of 4 bits formed by A'B'AB
+                 ; A = current reading of pin_A of the rotary encoder
+                 ; A' = previous reading of pin_A of the rotary encoder
+                 ; B = current reading of pin_B of the rotary encoder
+                 ; B' = previous reading of pin_B of the rotary encoder
+    jmp read     ; 0000 = from 00 to 00 = no change in reading
+    jmp CW       ; 0001 = from 00 to 01 = clockwise rotation
+    jmp CCW      ; 0010 = from 00 to 10 = counter clockwise rotation
+    jmp read     ; 0011 = from 00 to 11 = error
+
+    jmp CCW      ; 0100 = from 01 to 00 = counter clockwise rotation
+    jmp read     ; 0101 = from 01 to 01 = no change in reading 
+    jmp read     ; 0110 = from 01 to 10 = error
+    jmp CW       ; 0111 = from 01 to 11 = clockwise rotation
+ 
+    jmp CW       ; 1000 = from 10 to 00 = clockwise rotation
+    jmp read     ; 1001 = from 10 to 01 = error
+    jmp read     ; 1010 = from 10 to 10 = no change in reading 
+    jmp CCW      ; 1011 = from 10 to 11 = counter clockwise rotation
+ 
+    jmp read     ; 1100 = from 11 to 00 = error
+    jmp CCW      ; 1101 = from 11 to 01 = counter clockwise rotation
+    jmp CW       ; 1110 = from 11 to 10 = clockwise rotation
+    jmp read     ; 1111 = from 11 to 11 = no change in reading 
+
+pc_start:        ; this is the entry point for the program
+    in pins 2    ; read the current values of A and B and use 
+                 ; them to initialize the previous values (A'B')
+read:
+    mov OSR ISR  ; the OSR is (after the next instruction) used to shift 
+                 ; the two bits with the previous values into the ISR
+    out ISR 2    ; shift the previous value into the ISR. This also sets
+                 ; all other bits in the ISR to 0
+    in pins 2    ; shift the current value into the ISR
+                 ; the 16 LSB of the ISR now contain 000000000000A'B'AB
+                 ; this represents a jmp instruction to the address A'B'AB 
+    mov exec ISR ; do the jmp encoded in the ISR
+CW:              ; a clockwise rotation was detected
+    irq 0        ; signal a clockwise rotation via an IRQ
+    jmp read     ; jump to reading the current values of A and B
+CCW:             ; a counter clockwise rotation was detected
+    irq 1        ; signal a counter clockwise rotation via an IRQ
+;    jmp read    ; jump to reading the current values of A and B.
+                 ; the jmp isn't needed because of the .wrap, and the first 
+                 ; statement of the program happens to be a jmp read
+.wrap

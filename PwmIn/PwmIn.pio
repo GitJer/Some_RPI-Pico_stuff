@@ -1,0 +1,37 @@
+
+.program PwmIn
+
+; algorithm:
+
+; loop:
+;    reset the 'timer'
+;    loop: 
+;       decrement timer
+;       test for falling edge 
+;    record timer value as pulse width (actually, (0xFFFFFFFF - x)*2/125MHz is the pulse width)
+;    loop:
+;       test for rising edge
+;       decrement timer
+;    record the timer value as period (actually, (0xFFFFFFFF - x)*2/125MHz is the period)
+
+ 
+.wrap_target
+    mov x ~NULL         ; start with the value 0xFFFFFFFF
+
+timer:
+    jmp x-- test        ; count down
+    jmp timerstop       ; timer has reached 0, stop count down
+test:
+    jmp pin timer       ; test if the pin is still 1, if so, continue counting down
+timerstop:              ; pulse is over (or timer has reached 0)
+    mov ISR ~x          ; move the value ~x to the ISR: the pulsewidth (0xFFFFFFFF-x)
+    push noblock        ; push the ISR into the RX FIFO
+
+timer2:
+    jmp pin timerstop2  ; if the pin has become 1, the period is over, stop count down
+    jmp x-- timer2      ; if not: count down
+timerstop2:
+    mov ISR ~x          ; move the value ~x to the ISR: the period (0xFFFFFFFF-x)
+    push noblock        ; push the ISR into the RX FIFO
+
+.wrap

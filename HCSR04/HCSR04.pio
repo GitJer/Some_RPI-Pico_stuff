@@ -1,0 +1,72 @@
+
+; Description of the used algorithm
+;
+; start:
+;
+;   Give a puls to the HCSR04 Trig pin to start the measurement
+;       According to the datasheet the pulse should be 10us long.
+;       Assume the Trig pin is currently 0, set it to 1, wait 10 us, set it to 0
+;       A length of 10 us, with a clock of 125MHz this is 1250 ticks, or binary: 10011100010. 
+;       Assuming that the 10 us doesn't have to be very precise, round it down to 10011000000. 
+;       The delay can be achieved by:
+;       
+;           set x 19        ; set x to 10011 (and clear the higher bits)
+;           mov ISR x       ; copy x to ISR 
+;           in NULL 6       ; shift in 6 more 0 bits
+;           mov x ISR       ; move the ISR to x (which now contains 10011000000)
+;       delay1:
+;           jmp x-- delay1  ; count down to 0: a delay of (about) 10 us
+;
+;       This results in a delay of about 10us.
+;   
+;   The distance to the object is encoded in the length of the pulse on the Echo pin
+;       Read the Echo pin (USE A VOLTAGE DIVIDER) wait until the input pulse becomes high
+;       Set the value 0xFFFFFFFF in x; this is the start of the 'timer'. This can be achieved by
+;       mov x ~NULL 
+;
+;       Now the value in x is decremented in a loop and each time the Echo pin is tested. 
+;       If the Echo pin is 0, the value (0xFFFFFFFF - x) represents the length of the echo pulse.
+;       Note: each decrement of x and a test of the Echo pin is 2 pio clock cycles.
+;   Push the bit-inversed value of x, i.e. (0xFFFFFFFF - x) into the Rx FIFO
+;
+;   According to the HCSR04 datasheet, we have to wait for 60ms before starting another measurement
+;       Use the same trick as above to create a delay. But now with values:
+;       7500000 clock cycles = 11100100111000011100000, round down to 11100 + 18 * 0
+;
+; Go back to start
+
+
+.program HCSR04
+
+.wrap_target
+                    ; give a puls to the HCSR04 Trigger pin
+    set pins 1      ; set the trigger to 1 
+                    ; delay for 10 us (the length of the trigger pulse)
+    set x 19        ; set x to 10011 (and clear the higher bits)
+    mov ISR x       ; copy x to ISR 
+    in NULL 6       ; shift in 6 more 0 bits
+    mov x ISR       ; move the ISR to x (which now contains 10011000000)
+delay1:
+    jmp x-- delay1  ; count down to 0: a delay of (about) 10 us
+
+    set pins 0      ; make the trigger 0 again, completing the trigger pulse
+                    ; 
+    wait 1 pin 0    ; wait for the echo pin to rise
+                    ; start a counting loop to measure the length of the echo pulse
+    mov x ~NULL     ; start with the value 0xFFFFFFFF
+timer:
+    jmp x-- test    ; count down
+    jmp timerstop   ; timer has reached 0, stop count down
+test:
+    jmp pin timer   ; test if the echo pin is still 1, if so, continue counting down
+timerstop:          ; echo pulse is over (or timer has reached 0)
+    mov ISR ~x      ; move the bit-inversed value in x to the ISR
+    push noblock    ; push the ISR into the Rx FIFO
+                    ; delay for 60ms (advice from datasheet to prevent triggering on echos)
+    set x 28        ; set x to 11100
+    mov ISR x       ; copy x to ISR
+    in NULL 18      ; shift in 18 more bits
+    mov x ISR       ; move the ISR to x 
+delay2:
+    jmp x-- delay2  ; delay (about) 60 ms
+.wrap               ; start over
