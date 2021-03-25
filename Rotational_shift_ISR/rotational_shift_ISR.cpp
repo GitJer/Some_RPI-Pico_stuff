@@ -35,7 +35,7 @@ int main()
     // load the sm0 program into the pio memory
     uint offset = pio_add_program(pio, &rotational_shift_ISR_program);
     // make a sm config
-    pio_sm_config c = shifter_program_get_default_config(offset);
+    pio_sm_config c = rotational_shift_ISR_program_get_default_config(offset);
     // set shift direction
     // NOTE: IT IS SET TO SHIFT RIGHT! EVEN THOUGH THE PIO CODE SHIFTS RIGHT AND LEFT
     sm_config_set_in_shift(&c, true, false, 0);
