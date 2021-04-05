@@ -9,4 +9,4 @@ I wanted to have the sm run at its normal speed (125 MHz). The timing restrictio
 To make the ws2812 accept a new set of pixel data, a reset period has to be used. In my code I count how many pixel RGB values have been sent out and then start a delay loop. The led strip I use has 120 pixels, so, the pio code is specific to that amount of pixels. The delay loop is such that it waits long enough for the reset of the ws2812.
 
 ## Dithering
-I wanted to try dithering of for brightness values to make the transitions more smooth. In the code I have used a simple table with values to use for dithering. I have no idea how others do this, so maybe there are more clever ways. In the code first normal brightness changes are programmed, followed by dithered brightness changes.
+I wanted to try dithering for low brightness values to make the transitions more smooth. In the code I have used a simple table with values to use for dithering. I have no idea how others do this, so maybe there are more clever ways. In the code first normal brightness changes are programmed, followed by dithered brightness changes.
