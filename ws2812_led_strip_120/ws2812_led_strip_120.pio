@@ -1,0 +1,64 @@
+; This code sends pixel color data for ws2812 leds for a led strip of 120 leds.
+; Note: the data send from the c-code must contain 120 * RGB data.
+; It assumes the out-shift is set to right, such that the MSB of the RGB data is send first
+; It assumes the in-shift is set to left, such that the counters work correctly
+; 
+;
+; for the ws2812 a zero bit looks like this:
+;
+; |---|
+; |   |  
+; --------------
+;
+; a one bit looks like:
+;
+; |-------|
+; |       |  
+; --------------
+;
+; So, a zero consists of 1/3 high and then 2/3 low; a one consists of 2/3 high and then 1/3 low
+;
+; One pixel requires 24 bits to encode RGB with 8 bits each
+; the led strip I use has 120 pixels
+; after all pixels have been sent, wait a reset period to make the strip start again
+
+; the code below works as follows:
+; 1) make an outer loop that runs 2880 times (120 pixels * 24 bits)
+; 2) get the bytes with RGB data from the c-program, 
+;    shift them in one by one and send the correct ws2812 bit-encoding
+; 3) after all 2880 bits have been send to the pixels, wait a reset time (393216 * 1/125000000) = 3ms
+
+.program ws2812_led_strip_120
+
+.define T0 30
+start:
+        ; 120 times 24 (my led strip has 120 leds, 24 bits per pixel) = 2880
+        ; but note that the '0'th loop is also executed -> 2879 is needed
+        ; fill y with 2880 (101101000000) and subtract one to get 2879 (101100111111)
+    set y 22        ; set y to 10110 (the 5 MSB of 2880)
+    mov ISR y       ; copy them to the ISR
+    set y 16        ; set y to 10000 (the next 5 MSB of 2880)
+    in y 5          ; shift them in the ISR (note: left_in_shift is required)
+    in NULL 2       ; shift 2 0 into the ISR, now it contains 2880
+    mov y ISR       ; copy it into y
+    jmp y-- loop    ; decrease one to get 2879
+loop:
+    out x, 1        ; shift in one bit in x; note: this is blocking, 
+                    ; it must be blocking while the pins is 0.
+    set pins 1 [T0] ; pins is set to high; this is the first 1/3, always high
+    jmp !x send_zero  ; if a low must be sent, jump. 
+    jmp end_with_zero [T0+1] ; keep high for 31 c (now 2/3 of the time frame for one bit is high)
+send_zero:
+    set pins 0 [T0+1] ; set low for 31 c (the middle 1/3 is low)
+end_with_zero:
+    set pins 0 [T0] ; set low for 31 c (including the out x, 1 = 31c). The last 1/3 is always low
+    jmp y-- loop    ; if not all of the 2880 bits have been sent, send another
+
+    ; delay 12288 clock cycles (about 100 us)
+    set y 24        ; binary = 11000
+    mov ISR y
+    in NULL 9       ; shift in 9 zero bits
+    mov y ISR       ; y now contains 11000000000000 = 12288
+delay_loop:         ; the actual delay loop
+    jmp y-- delay_loop 
+    jmp start       ; start again for a new set of pixel data

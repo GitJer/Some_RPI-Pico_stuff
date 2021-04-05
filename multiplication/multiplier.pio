@@ -1,0 +1,50 @@
+
+.program multiplier
+
+; overall approach:
+    ; get the two numbers to be multiplied, called m1 and m2
+    ; m2 is saved in OSR, m1 is saved in ISR
+    ; use the (negative) y as counter
+    ; repeat m2 times: 
+    ;    repeat m1 times:
+    ;       subtract one from y
+
+ 
+.wrap_target
+start:
+    pull block      ; wait until data is available
+    mov x OSR       ; get m1
+    mov ISR x       ; save m1 in the ISR; this value is used m2 times
+    pull block      ; get m2 
+    mov y OSR
+                    ; test if m2 = 0, if so -> return a 0
+    jmp y-- not_zero; if m2 > 0, subtract 1 and go to not_zero
+    mov ISR NULL    ; m2 == 0, return a 0 as answer
+    push
+    jmp start       ; restart
+
+not_zero:
+    mov OSR y       ; write back m2-1 in the OSR
+    mov y ~NULL	    ; initialize the y register to 0xFFFFFFFF
+
+next_x:             ; start the actual multiplication by counting m2 times m1 times subtracting one from y
+    jmp x-- sub_one ; count down x, and if still x > 0 - also decrement y
+                    ; if x==0, m1 has been counted down, see if OSR > 0 (i.e. m2), if so, go again
+    mov x OSR       ; get the saved value of m2 from the OSR
+    jmp x-- save_m2 ; if x>0 save the new value of m2 and start subtracting x (and also y)
+    ; nothing more to do, m2 has been counted down to 0, return the answer
+    mov ISR ~y
+    push
+    .wrap
+
+sub_one:            ; subtract one from y
+    jmp y--	next_x  ; y is (as it should) > 0 -> continue the multiplication
+    mov ISR ~NULL   ; y has become 0, only happens for large numbers -> give 0xFFFFFFFF as answer
+    push
+    jmp start
+
+save_m2:            ; save m2 and switch to m1 in x
+    mov OSR x       ; save the x (m2) in the OSR
+    mov x ISR       ; start over with m1
+    jmp next_x
+
