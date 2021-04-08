@@ -42,8 +42,8 @@ Most microcontrollers have hardware to produce Pulse Width Modulation (PWM) sign
 ## HC-SR04 using the PIO code
 [This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/HCSR04) reads the HC-SR04, an ultrasonic distance measurement unit.
 
-# Ws2812 led strip with 120 pixels 
+## Ws2812 led strip with 120 pixels 
 [This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/ws2812_led_strip_120) is my take on how to control a ws2812 led strip with 120 pixels
 
-# multiply two numbers 
+## multiply two numbers 
 [This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/multiplication) multiplies two numbers.
