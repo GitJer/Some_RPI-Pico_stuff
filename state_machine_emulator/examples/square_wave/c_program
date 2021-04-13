@@ -1,0 +1,3 @@
+# timestamp, command, arguments of command (typically pio, sm, arguments)
+0, set_base, 0, 0, 0
+0, set_count, 0, 0, 1

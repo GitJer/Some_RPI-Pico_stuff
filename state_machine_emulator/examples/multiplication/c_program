@@ -1,0 +1,7 @@
+# timestamp, command, arguments of command
+0, pio_sm_put, 0, 0, 5
+0, pio_sm_put, 0, 0, 3
+55, pio_sm_get, 0, 0
+56, pio_sm_put, 0, 0, 7
+56, pio_sm_put, 0, 0, 8
+225, pio_sm_get, 0, 0

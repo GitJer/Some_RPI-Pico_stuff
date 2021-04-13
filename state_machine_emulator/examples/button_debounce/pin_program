@@ -1,0 +1,20 @@
+# timestamp, pinnumber, state
+# timestamp 0 is the first clock
+# pinnumber = all means all GPIOs
+# pinnumber = GPIOx means pin x
+# state = -1 means not driven externally
+# state = 0 means driven low externally
+# state = 1 means driven high externally
+0, all, -1
+# the first couple of changes are skipped by the debouncing pc<6 meaning a 0
+0, GPIO0, 0
+20, GPIO0, 1
+40, GPIO0, 0
+60, GPIO0, 1
+80, GPIO0, 0
+100, GPIO0, 1
+# around this point the switch to 1 is made, pc>=6
+240, GPIO0, 0
+280, GPIO0, 1
+320, GPIO0, 0
+360, GPIO0, 1
