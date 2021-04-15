@@ -307,7 +307,10 @@ class state_machine:
                 self.rp2040.GPIO_pindirs[(
                     self.settings["out_base"] + pin) % 32] = value & (1 << pin)
         elif destination == 5:   # PC
-            self.vars["pc"] = value
+            # save the address to jump to for when the pc is set for the new instruction
+            self.jmp_to = value & 0x1F
+            # the address is given, so, no increase of one for the pc
+            self.skip_increase_pc = True
         elif destination == 6:   # ISR
             self.vars["ISR"] = value
             self.vars["ISR_shift_counter"] += bit_count
@@ -421,7 +424,11 @@ class state_machine:
             # TODO:
             pass
         elif destination == 5:   # PC
-            self.vars["pc"] = value
+            # save the address to jump to for when the pc is set for the new instruction
+            self.jmp_to = value & 0x1F
+            # the address is given, so, no increase of one for the pc
+            self.skip_increase_pc = True
+
         elif destination == 6:   # ISR
             self.vars["ISR"] = value
             self.vars["ISR_shift_counter"] = 0

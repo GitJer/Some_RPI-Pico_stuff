@@ -18,6 +18,11 @@ def step_callback(self):
     self.update_display()
 
 
+def reload_callback(self):
+    self.reload_flag = True
+    self.__del__()
+
+
 def restart_callback(self):
     # print('restart')
     self.current_clock = 0
@@ -74,6 +79,9 @@ def build_toolbar(self):
     self.toolbar = Frame(self.root, borderwidth=2, relief='raised')
     self.toolbar.grid(row=0, columnspan=4, padx=10, pady=2, sticky="EW")
 
+    self.reload_button = Button(
+        self.toolbar, text="Reload", command=lambda: self.reload_callback())
+    self.reload_button.pack(side=LEFT, fill=NONE)
     self.restart_button = Button(
         self.toolbar, text="Restart", command=lambda: self.restart_callback())
     self.restart_button.pack(side=LEFT, fill=NONE)

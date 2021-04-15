@@ -106,29 +106,35 @@ if __name__ == "__main__":
         pin_program_filename = sys.argv[2]
         c_program_filename = sys.argv[3]
     else:
-        print("Usage: ", sys.argv[0], " file.pio.h pin_program c_program")
+        print("Usage: python", sys.argv[0], "file.pio.h pin_program c_program")
+        exit()
 
-    # TODO: more than one program can be defined!
-    # first define the c_program list because in the pio_program there may already be c_statements
-    c_program = list()
-    pio_program, pio_program_length, pio_program_origin, pio_program_wrap_target, pio_program_wrap = process_file_pio_h(
-        pio_h_filename)
-    process_file_c_program(c_program_filename, c_program)
-    pin_program = process_file_pin_program(pin_program_filename)
+    # TODO: move (almost all of) the code below into the interface?
+    load_files = True
+    while load_files:
+        load_files = False
+        # TODO: more than one program can be defined!
+        # first define the c_program list because in the pio_program there may already be c_statements
+        c_program = list()
+        pio_program, pio_program_length, pio_program_origin, pio_program_wrap_target, pio_program_wrap = process_file_pio_h(
+            pio_h_filename)
+        process_file_c_program(c_program_filename, c_program)
+        pin_program = process_file_pin_program(pin_program_filename)
 
-    program_definitions = dict()
-    program_definitions['pio_program'] = pio_program
-    program_definitions['pio_program_length'] = pio_program_length
-    program_definitions['pio_program_origin'] = pio_program_origin
-    program_definitions['pio_program_wrap_target'] = pio_program_wrap_target
-    program_definitions['pio_program_wrap'] = pio_program_wrap
+        program_definitions = dict()
+        program_definitions['pio_program'] = pio_program
+        program_definitions['pio_program_length'] = pio_program_length
+        program_definitions['pio_program_origin'] = pio_program_origin
+        program_definitions['pio_program_wrap_target'] = pio_program_wrap_target
+        program_definitions['pio_program_wrap'] = pio_program_wrap
 
-    # make the RP2040 emulation (and it will make the PIO and sm)
-    my_rp2040 = rp2040.rp2040(program_definitions)
-    my_emulation = emulation.emulation(my_rp2040, pin_program, c_program)
+        # make the RP2040 emulation (and it will make the PIO and sm)
+        my_rp2040 = rp2040.rp2040(program_definitions)
+        my_emulation = emulation.emulation(my_rp2040, pin_program, c_program)
 
-    print("Emulating ... ", end="")
-    my_emulation.emulate(500)
-    print("finished")
-    my_RPI_PICO_PIO_interface = RPI_PICO_PIO_interface(
-        pio_program, pin_program, c_program, my_emulation.output, my_emulation.emulation_output_c_program)
+        print("Emulating ... ", end="")
+        my_emulation.emulate(500)
+        print("finished")
+        my_RPI_PICO_PIO_interface = RPI_PICO_PIO_interface(
+            pio_program, pin_program, c_program, my_emulation.output, my_emulation.emulation_output_c_program)
+        load_files = my_RPI_PICO_PIO_interface.get_reload_flag()
