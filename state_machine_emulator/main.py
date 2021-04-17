@@ -43,18 +43,15 @@ def process_file_pio_h(filename):
                 line2 = pio_file.readline()
                 # print("line2=", line2)
                 while '}' not in line2:
-                    if 'sm_config_set_wrap' in line2:
-                        # TODO:? of is this already handled elsewhere?
-                        pass
-                    elif 'sm_config_set_sideset' in line2:
+                    if 'sm_config_set_sideset' in line2:
                         parts = line2.split(',')
                         print("parts=", parts)
                         a1 = int(parts[1].strip())
-                        a2 = bool(parts[2].strip())
-                        a3 = bool(parts[3].split(')')[0].strip())
-                        print(a1, a2, a3)
-                        c_program.append(
-                            [0, 'sm_config_set_sideset', a1, a2, a3])
+                        c_program.append([0, 'side_set_count', 0, 0, a1])
+                        a2 = parts[2].strip().lower() == 'true'
+                        c_program.append([0, 'side_set_opt', 0, 0, a2])
+                        a3 = parts[3].split(')')[0].strip().lower() == 'true'
+                        c_program.append([0, 'side_set_pindirs', 0, 0, a3])
                     line2 = pio_file.readline()
             line = pio_file.readline()
     if len(pio_program) != pio_program_length:
@@ -109,7 +106,7 @@ if __name__ == "__main__":
         print("Usage: python", sys.argv[0], "file.pio.h pin_program c_program")
         exit()
 
-    # TODO: move (almost all of) the code below into the interface?
+    # flag to indicate that files need to be (re)loaded. This is used when the user pushes the reload button in the GUI
     load_files = True
     while load_files:
         load_files = False

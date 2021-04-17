@@ -48,8 +48,10 @@ class state_machine:
         self.settings["out_base"] = 0
         self.settings["out_count"] = 32
         self.settings["side_set_base"] = 0
-        self.settings["side_set_count"] = -1
-        self.settings["side_set"] = 0  # disabled
+        self.settings["side_set_count"] = 0
+        self.settings["side_set_opt"] = False
+        self.settings["side_set_pindirs"] = False
+        # self.settings["side_set"] = 0  # disabled
         self.settings["in_base"] = 0
         self.settings["PINCTRL_IN_BASE"] = 0
         self.settings["FDEBUG_RXSTALL"] = 0
@@ -127,10 +129,46 @@ class state_machine:
         # get the three bits that encode the instruction type
         instruction_type = (instruction & 0xE000) >> 13
         # get the five delay/side-set bits
-        instruction_del_ss = (instruction & 0x1F00) >> 8
-        # print("delay/side-set=", instruction_del_ss)
-        # TODO: for now assume side-set is not used -> all bits are a delay
-        self.vars["delay"] = instruction_del_ss
+        instruction_delay_side_step = (instruction & 0x1F00) >> 8
+        print("delay/side-set=", instruction_delay_side_step)
+        # the bits for delay is 5 minus the number of side_set pins
+        # and if side_set_opt is True, the MSB should be set, leaving one less bit for delay
+        bits_for_delay = 5 - \
+            self.settings["side_set_count"] - \
+            (1 if self.settings["side_set_opt"] else 0)
+        # delay is the bits_for_delay LSB of instruction_del_ss
+        self.vars["delay"] = instruction_delay_side_step & (
+            (1 << bits_for_delay) - 1)
+        # if side_set is optional the MSB is set when side_set should be executed:
+        if self.settings["side_set_opt"]:
+            # check if the MSB is set
+            if instruction_delay_side_step & 0x10:
+                # do the side step for side_set_count bits after the MSB
+                # note: side_set_count include the optional bit!
+                for i in range(self.settings["side_set_count"]-1):
+                    test_ss_bit = 4-i-1
+                    value = 1 if instruction_delay_side_step & (
+                        1 << test_ss_bit) else 0
+                    # do the side step for side_set_base + i
+                    if self.settings["side_set_pindirs"]:
+                        self.rp2040.GPIO_pindirs[(
+                            self.settings["side_set_base"] + i) % 32] = value
+                    else:
+                        self.rp2040.GPIO[(
+                            self.settings["side_set_base"] + i) % 32] = value
+        else:  # side_set is mandatory
+            for i in range(self.settings["side_set_count"]):
+                test_ss_bit = 5-i-1
+                # if the bit is set, the GPIO (or pindir) has to be set; if not: clear the GPIO/pindir
+                value = 1 if instruction_delay_side_step & (
+                    1 << test_ss_bit) else 0
+                # do the side step for side_set_base + i
+                if self.settings["side_set_pindirs"]:
+                    self.rp2040.GPIO_pindirs[(
+                        self.settings["side_set_base"] + i) % 32] = value
+                else:
+                    self.rp2040.GPIO[(
+                        self.settings["side_set_base"] + i) % 32] = value
 
         is_pull = 1 if (instruction & (1 << 7)) > 0 else 0
 

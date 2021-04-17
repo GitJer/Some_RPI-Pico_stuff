@@ -107,6 +107,10 @@ class emulation:
                     sm.settings["side_set_base"] = c[4]
                 elif c[1] == 'side_set_count':
                     sm.settings["side_set_count"] = c[4]
+                elif c[1] == 'side_set_opt':
+                    sm.settings["side_set_opt"] = c[4]
+                elif c[1] == 'side_set_pindirs':
+                    sm.settings["side_set_pindirs"] = c[4]
                 elif c[1] == 'out_base':
                     sm.settings["out_base"] = c[4]
                 elif c[1] == 'out_count':
