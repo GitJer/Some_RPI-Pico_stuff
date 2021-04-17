@@ -88,10 +88,7 @@ class state_machine:
                 self.vars["pc"] = self.wrap_target
 
         # get the new instruction and execute it
-        # print("pc=", self.vars["pc"])
         instruction = int(self.program[self.vars["pc"]][0], 16)
-        # print("instruction=", instruction, "->",
-        #       self.program[self.vars["pc"]][1])
         self.execute_instruction(instruction)
 
         # do auto push
@@ -130,7 +127,6 @@ class state_machine:
         instruction_type = (instruction & 0xE000) >> 13
         # get the five delay/side-set bits
         instruction_delay_side_step = (instruction & 0x1F00) >> 8
-        print("delay/side-set=", instruction_delay_side_step)
         # the bits for delay is 5 minus the number of side_set pins
         # and if side_set_opt is True, the MSB should be set, leaving one less bit for delay
         bits_for_delay = 5 - \
