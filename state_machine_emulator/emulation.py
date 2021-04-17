@@ -103,9 +103,13 @@ class emulation:
                     sm.settings["set_base"] = c[4]
                 elif c[1] == 'set_count':
                     sm.settings["set_count"] = c[4]
-                elif c[1] == 'side_set_base':
+                elif c[1] == 'in_base':
+                    sm.settings["in_base"] = c[4]
+                elif c[1] == 'jmp_pin':
+                    sm.settings["jmp_pin"] = c[4]
+                elif c[1] == 'sideset_base':
                     sm.settings["side_set_base"] = c[4]
-                elif c[1] == 'side_set_count':
+                elif c[1] == 'sideset_count':
                     sm.settings["side_set_count"] = c[4]
                 elif c[1] == 'side_set_opt':
                     sm.settings["side_set_opt"] = c[4]
@@ -115,10 +119,10 @@ class emulation:
                     sm.settings["out_base"] = c[4]
                 elif c[1] == 'out_count':
                     sm.settings["out_count"] = c[4]
-                elif c[1] == 'out_shift_direction':
-                    sm.settings["out_shift_direction"] = c[4]
-                elif c[1] == 'sm_config_set_in_shift':
-                    sm.settings["in_shift_direction"] = c[2]
+                elif c[1] == 'out_shift_right':
+                    sm.settings["out_shift_right"] = c[4]
+                elif c[1] == 'sm_config_set_in_shift':      # TODO: not as c-code but just a name
+                    sm.settings["in_shift_right"] = c[2]
                     sm.settings["in_shift_autopush"] = c[3]
                     sm.settings["in_shift_push_threshold"] = c[4]
                 elif c[1] == 'pio_sm_get_pc':
@@ -130,3 +134,5 @@ class emulation:
                     sm.settings["sm_config_set_in_pins"] = c[2]
                 elif c[1] == 'sm_config_set_jmp_pin':
                     sm.settings["sm_config_set_jmp_pin"] = c[2]
+                else:
+                    print("Error: unknown c-program statement, continuing")

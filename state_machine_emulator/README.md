@@ -44,3 +44,4 @@ I have included a number of examples to show that it works. For an explanation I
 * [rotational shift](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/Rotational_shift_ISR)
 * [square wave](https://datasheets.raspberrypi.org/rp2040/rp2040-datasheet.pdf), the RP2040 Datasheet
 * [stepper motor](https://www.youtube.com/watch?v=UJ4JjeCLuaI) by Tinker Tech Trove
+* side_step

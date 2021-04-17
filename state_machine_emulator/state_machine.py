@@ -30,31 +30,32 @@ class state_machine:
         self.vars["delay"] = 0
 
         self.settings = {}
-        self.settings["in_shift_direction"] = 0  # right
-        self.settings["in_shift_autopush"] = 0  # false
-        self.settings["SHIFTCTRL_PUSH_THRESH"] = 32  # false
-        self.settings["out_shift_direction"] = 0  # right #TODO:
-        self.settings["out_shift_autopull"] = 0  # false
-        self.settings["SHIFTCTRL_PULL_THRESH"] = 32  # false
-        self.settings["out_special_sticky"] = 0  # TODO:false
-        self.settings["out_special_has_enable_pin"] = 0  # TODO:false
-        self.settings["out_special_enable_pin_index"] = 0  # TODO:
-        self.settings["mov_status_sel"] = 0  # TODO:STATUS_TX_LESSTHAN
-        self.settings["mov_status_n"] = 0     # TODO:
+        self.settings["in_shift_right"] = True  # right
+        self.settings["in_shift_autopush"] = False
+        self.settings["push_threshold"] = 32  # false
+        self.settings["out_shift_right"] = True  # right #TODO:
+        self.settings["out_shift_autopull"] = False
+        self.settings["pull_threshold"] = 32  # false
+        # self.settings["out_special_sticky"] = 0  # TODO:false
+        # self.settings["out_special_has_enable_pin"] = 0  # TODO:false
+        # self.settings["out_special_enable_pin_index"] = 0  # TODO:
+        # self.settings["mov_status_sel"] = 0  # TODO:STATUS_TX_LESSTHAN
+        # self.settings["mov_status_n"] = 0     # TODO:
+        # TODO: is this a variable? is it used at all?
         self.settings["status"] = -1
-        self.settings["jmp_pin"] = 0
-        self.settings["set_base"] = 0
+        self.settings["in_base"] = -1
+        self.settings["jmp_pin"] = -1
+        self.settings["set_base"] = -1
         self.settings["set_count"] = 0
-        self.settings["out_base"] = 0
-        self.settings["out_count"] = 32
-        self.settings["side_set_base"] = 0
+        self.settings["out_base"] = -1
+        self.settings["out_count"] = 0
+        self.settings["side_set_base"] = -1
         self.settings["side_set_count"] = 0
         self.settings["side_set_opt"] = False
         self.settings["side_set_pindirs"] = False
         # self.settings["side_set"] = 0  # disabled
-        self.settings["in_base"] = 0
-        self.settings["PINCTRL_IN_BASE"] = 0
-        self.settings["FDEBUG_RXSTALL"] = 0
+        # self.settings["PINCTRL_IN_BASE"] = 0
+        # self.settings["FDEBUG_RXSTALL"] = 0
 
         # for e.g. jmp the pc should not be updated after an execution step since it is set by the jmp
         # also for e.g. wait statements the pc should remain unchanged
@@ -92,7 +93,7 @@ class state_machine:
         self.execute_instruction(instruction)
 
         # do auto push
-        if self.settings["in_shift_autopush"] and (self.vars["ISR_shift_counter"] >= self.settings["SHIFTCTRL_PUSH_THRESH"]):
+        if self.settings["in_shift_autopush"] and (self.vars["ISR_shift_counter"] >= self.settings["push_threshold"]):
             if self.vars["RxFIFO_count"] < 4:
                 self.vars["RxFIFO"][self.vars["RxFIFO_count"]
                                     ] = self.vars["ISR"]
@@ -102,11 +103,11 @@ class state_machine:
             else:
                 # block: do not go to next instruction
                 self.skip_increase_pc = True
-                self.FDEBUG_RXSTALL = 1
+                # self.FDEBUG_RXSTALL = 1
 
         # do auto pull
         # TODO: see section 3.5.4.2
-        if self.settings["out_shift_autopull"] and (self.vars["OSR_shift_counter"] >= self.in_shift_pull_threshold):
+        if self.settings["out_shift_autopull"] and (self.vars["OSR_shift_counter"] >= self.settings["pull_threshold"]):
             if self.vars["TxFIFO_count"] != 0:
                 # there is data in the TxFIFO, place the first item in the OSR
                 self.vars["OSR"] = self.vars["TxFIFO"][0]
@@ -236,7 +237,7 @@ class state_machine:
             if self.rp2040.GPIO[index] != polarity:
                 is_not_met = True
         elif source == 1:           # pin
-            if self.rp2040.GPIO[self.settings["PINCTRL_IN_BASE"]+index] != polarity:
+            if self.rp2040.GPIO[self.settings["in_base"]+index] != polarity:
                 is_not_met = True
         elif source == 2:           # IRQ
             MSB = 1 if (instruction & (1 << 4)) > 0 else 0
@@ -287,7 +288,7 @@ class state_machine:
             print("Error: execute_mov: unknown source, skipping")
             return
         self.vars["ISR_shift_counter"] += bit_count
-        if self.settings["in_shift_direction"] == 0:  # shift right
+        if self.settings["in_shift_right"]:  # shift right
             self.vars["ISR"] >>= bit_count
             self.vars["ISR"] |= value << (32-bit_count)
         else:  # shift left
@@ -301,7 +302,8 @@ class state_machine:
         if bit_count == 0:
             bit_count = 32
 
-        if self.settings["out_shift_direction"] == 1:  # shift to the left
+        # shift to the left  #TODO: switch with left to remove the 'not'
+        if not self.settings["out_shift_right"]:
             # take the bit_count MSB by making a mask and shifting it left
             mask = (1 << bit_count)-1
             # shift them (32-bit_count) to the left
@@ -368,7 +370,7 @@ class state_machine:
             self.vars["ISR"] = 0
         else:
             # if blocking do not go to next instruction
-            self.FDEBUG_RXSTALL = 1
+            # self.FDEBUG_RXSTALL = 1
             if Blk:
                 self.skip_increase_pc = True
             else:

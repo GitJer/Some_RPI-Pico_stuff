@@ -3,4 +3,4 @@
 0, out_count, 0, 0, 4
 0, pio_sm_put, 0, 0, 100
 0, pio_sm_put, 0, 0, 2216789025
-0, out_shift_direction, 0, 0, 1
+0, out_shift_right, 0, 0, 1

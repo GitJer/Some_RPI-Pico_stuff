@@ -3,7 +3,7 @@ from tkinter import *
 
 def build_mid_frame(self):
     """ build the panel with the sm variables and settings """
-    from interface.interface_item import Interface_Item_Var_Bits_32, Interface_Item_Var_List
+    from interface.interface_item import Interface_Item_Var_Bits_32, Interface_Item_Var_List, Interface_Item_Pin_Settings_32
 
     # In the middle
     self.mid_frame = Frame(self.root, width=460, height=700)
@@ -30,7 +30,12 @@ def build_mid_frame(self):
     self.pc_label.grid(row=grid_row, column=1, padx=(10, 10), sticky=W)
     grid_row += 1
 
-    # status
+    # Wait cycles to complete
+    self.delay_label = Label(self.mid_frame, text="delay=0")
+    self.delay_label.grid(row=grid_row, column=1, padx=(10, 10), sticky=W)
+    grid_row += 1
+
+    # TODO: status (not used in other parts of the code!)
     self.status_label = Label(self.mid_frame, text="status=0")
     self.status_label.grid(row=grid_row, column=1, padx=(10, 10), sticky=W)
     grid_row += 1
@@ -60,47 +65,53 @@ def build_mid_frame(self):
         "GPIO", self.mid_frame, grid_row, 1, self.emulation_results, 0)
     grid_row += 1
 
+    # Label to indicate pin configuration
+    self.pin_config_label = Label(self.mid_frame, text="Pin configuration:")
+    self.pin_config_label.grid(row=grid_row, column=1, padx=(10, 10), sticky=W)
+    grid_row += 1
+
     # GPIO pindirs
     self.GPIO_pindirs_label = Interface_Item_Var_List(
         "GPIO pindir", self.mid_frame, grid_row, 1, self.emulation_results, 1)
     grid_row += 1
 
     # IN_pins
-    temp = Label(self.mid_frame, text="IN_pins=")
-    temp.grid(row=grid_row, column=1, padx=(10, 10), sticky=W)
-    self.IN_pins_label = Label(
-        self.mid_frame, text="0 = 00000000000000000000000000000000")
-    self.IN_pins_label.grid(row=grid_row, column=1,
-                            padx=(10, 10), sticky=E)
+    self.in_pins_label = Interface_Item_Pin_Settings_32(
+        "IN pins", "in_base", None, self.mid_frame, grid_row, 1, self.emulation_results, 3)
     grid_row += 1
 
     # OUT_PINS
-    temp = Label(self.mid_frame, text="OUT_PINS=")
-    temp.grid(row=grid_row, column=1, padx=(10, 10), sticky=W)
-    self.OUT_PINS_label = Label(
-        self.mid_frame, text="0 = 00000000000000000000000000000000")
-    self.OUT_PINS_label.grid(
-        row=grid_row, column=1, padx=(10, 10), sticky=E)
+    self.out_pins_label = Interface_Item_Pin_Settings_32(
+        "OUT pins", "out_base", "out_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
     grid_row += 1
 
     # SET_PINS
-    temp = Label(self.mid_frame, text="SET_PINS=")
-    temp.grid(row=grid_row, column=1, padx=(10, 10), sticky=W)
-    self.SET_PINS_label = Label(
-        self.mid_frame, text="0 = 00000000000000000000000000000000")
-    self.SET_PINS_label.grid(
-        row=grid_row, column=1, padx=(10, 10), sticky=E)
+    self.set_pins_label = Interface_Item_Pin_Settings_32(
+        "SET pins", "set_base", "set_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
+    grid_row += 1
+
+    # SIDE_SET_PINS
+    self.sideset_pins_label = Interface_Item_Pin_Settings_32(
+        "SIDESET pins", "side_set_base", "side_set_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
+    grid_row += 1
+
+    # JMP_PIN
+    self.jmp_pin_label = Interface_Item_Pin_Settings_32(
+        "JMP pin", "jmp_pin", None, self.mid_frame, grid_row, 1, self.emulation_results, 3)
     grid_row += 1
 
     # settings_box/list
     # TODO: update
+    # only some settings are to be displayed
+    list_of_settings_to_be_displayed = [
+        "in_shift_right", "in_shift_autopush", "push_threshold", "out_shift_right", "out_shift_autopull", "pull_threshold", "side_set_opt", "side_set_pindirs"]
     temp = Label(self.mid_frame, text="Settings=")
     temp.grid(row=grid_row, column=1, padx=(10, 10), sticky=W)
-    # self.previous_selected_settings = None
-    self.settings_listbox = Listbox(self.mid_frame, height=20, width=40)
+    self.settings_listbox = Listbox(self.mid_frame, height=10, width=40)
     settings = self.emulation_results[0][3]
     for k, v in settings.items():
-        self.settings_listbox.insert(END, k + " = " + str(v))
+        if k in list_of_settings_to_be_displayed:
+            self.settings_listbox.insert(END, k + " = " + str(v))
     grid_row += 1
     self.settings_listbox.grid(row=grid_row, column=1, padx=(10, 10))
 
@@ -110,6 +121,7 @@ def update_mid_frame(self):
     vars = self.emulation_results[self.current_clock][2]
     self.clock_label['text'] = "clock=" + str(self.current_clock)
     self.pc_label['text'] = "pc=" + str(vars['pc'])
+    self.delay_label['text'] = "delay=" + str(vars['delay'])
     self.OSR_label.update(self.current_clock)
     self.ISR_label.update(self.current_clock)
     self.X_label.update(self.current_clock)
@@ -117,3 +129,8 @@ def update_mid_frame(self):
     self.GPIO_label.update(self.current_clock)
     self.GPIO_pindirs_label.update(self.current_clock)
     self.IRQ_label.update(self.current_clock)
+    self.in_pins_label.update(self.current_clock)
+    self.out_pins_label.update(self.current_clock)
+    self.set_pins_label.update(self.current_clock)
+    self.sideset_pins_label.update(self.current_clock)
+    self.jmp_pin_label.update(self.current_clock)
