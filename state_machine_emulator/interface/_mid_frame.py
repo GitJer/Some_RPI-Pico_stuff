@@ -60,7 +60,8 @@ def build_mid_frame(self):
         "Y", "y", self.mid_frame, grid_row, 1, self.emulation_results, 2)
     grid_row += 1
 
-    # GPIO
+    # GPIO # TODO: indicate externally or internally driven?
+    # e.g. -1 (not driven), H (externally driven), 1 (internally driven), L (external), 0 (internal), E (conflict between internal and exteral)
     self.GPIO_label = Interface_Item_Var_List(
         "GPIO", self.mid_frame, grid_row, 1, self.emulation_results, 0)
     grid_row += 1
@@ -80,17 +81,17 @@ def build_mid_frame(self):
         "in pins", "in_base", None, self.mid_frame, grid_row, 1, self.emulation_results, 3)
     grid_row += 1
 
-    # OUT_PINS
+    # OUT_pins
     self.out_pins_label = Interface_Item_Pin_Settings_32(
         "out pins", "out_base", "out_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
     grid_row += 1
 
-    # SET_PINS
+    # SET_pins
     self.set_pins_label = Interface_Item_Pin_Settings_32(
         "set pins", "set_base", "set_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
     grid_row += 1
 
-    # SIDESET_PINS
+    # SIDESET_pins
     self.sideset_pins_label = Interface_Item_Pin_Settings_32(
         "sideset pins", "sideset_base", "sideset_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
     grid_row += 1

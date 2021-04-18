@@ -14,7 +14,7 @@ class rp2040:
         self.GPIO = [0 for i in range(32)]
         # each GPIO has pin direction
         # TODO: should this be a character that can be set to 'I' and 'O' and '.' for not set?
-        self.GPIO_pindirs = [0 for i in range(32)]
+        self.GPIO_pindirs = [-1 for i in range(32)]
         # RP2040 clock
         self.clock = 0
 

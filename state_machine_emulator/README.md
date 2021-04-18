@@ -55,7 +55,7 @@ The currently supported pin_program statements are:
 * all
 
 ## What does not yet work, what could be improved, does it contain bugs?
-Lots of things; Oh yeah, lots of things; Yes, be warned!
+Lots of things; Lots of things; Yes, be warned!
 
 * not all functionality is implemented (search for TODO: in the code), and what is implemented may be buggy and inefficient
 * unintuitive GUI 
@@ -64,7 +64,9 @@ Lots of things; Oh yeah, lots of things; Yes, be warned!
 * allow uncompiled code as pio programme, instead of the pioasm compiled code
   * I've chosen not to do this, see 'Workflow' above, instead I've made a 'Reload' button
 * highlight the changed values when stepping through the emulation results
-* if a GPIO is set/read by the code, there is no check if it really is an output/input
+* if a GPIO is set/read by the code, there is no check if it really is an output/input; GPIO PINDIRS needs to be improved
+* the priority of pin mapping (datasheet 3.2.5 Pin Mapping) is not taken into account
+* there are accessible 30 GPIOs, but here there are 32
 
 
 ## Examples
@@ -75,40 +77,4 @@ I have included a number of examples to show that it works. For an explanation I
 * [square wave](https://datasheets.raspberrypi.org/rp2040/rp2040-datasheet.pdf), the RP2040 Datasheet
 * [stepper motor](https://www.youtube.com/watch?v=UJ4JjeCLuaI) by Tinker Tech Trove
 * side_step
-
-## Possible other approaches
-
-### Inject instructions
-
-What
-
-Disadvantages
-
-You can even make code that 'flushes out' all registers and FIFOs 
-
-Disadvantages
-
-### Single step the sm
-
-Over at Discord (XX) user [clever](https://discord.com/channels/801944326401556512/801948576242597928/832351663611445330) pointed to a post of [LukeW](https://discord.com/channels/801944326401556512/801948576242597928/811793590095183923) in which a debug method is described that makes the sm single step through the code and lets you examine the available registers 
-
-Once:
-- Disable state machine (CTRL EN)
-- Set CLKDIV to 0 (max count)
-
-Then repeatedly:
-- Disable IRQs on the processor
-- Strobe CLKDIV_RESTART
-- Enable state machine
-- Strobe CLKDIV_RESTART again
-- Disable state machine
-- Reenable IRQs on the processor
-That should let you reliably generate single clock enable pulses
-using that, you can single-step a real SM on the pico
-there are registers to let you see the desired direction and output level a PIO is wanting, which let you detect outputs, while the pins arent properly muxed
-configure all of the pins for output mode, with a single sample of bits present
-single-step the SM
-read the desired direction and level
-repeat for N steps
-with the above, you can take an array of 32bit input states
-and then generate an array of 32 direction and 32bit output states
+* in_shift
