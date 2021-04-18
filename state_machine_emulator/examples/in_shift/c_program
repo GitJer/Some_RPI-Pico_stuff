@@ -1,0 +1,5 @@
+# timestamp, command, arguments of command
+0, in_base,  0
+0, in_shift_right,  0
+9, in_base,  10
+9, in_shift_right,  1

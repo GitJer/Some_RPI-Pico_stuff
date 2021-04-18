@@ -9,7 +9,7 @@ def build_right_frame(self):
     self.right_frame.grid_propagate(0)
 
     self.program_label = Label(
-        self.right_frame, text="Highlight is just executed:")
+        self.right_frame, text="Highlight is just executed pio-code:")
     self.program_label.grid(row=1, column=2, padx=(10, 10), sticky=W)
     # PIO program
     self.code_listbox = Listbox(self.right_frame, height=32, width=40)

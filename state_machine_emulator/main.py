@@ -11,8 +11,7 @@ It provides a GUI to step through the emulation results.
 
 def process_file_pio_h(filename):
     """ read and parse a pioasm generated header file """
-    # TODO: .side_set, public, .word
-    # Note: side_set is noticeable in two places: the instructions + the sm_config as c-program statements:
+    # TODO: public, .word
     pio_program = list()
     with open(filename, 'r') as pio_file:
         line = pio_file.readline()
@@ -45,13 +44,13 @@ def process_file_pio_h(filename):
                 while '}' not in line2:
                     if 'sm_config_set_sideset' in line2:
                         parts = line2.split(',')
-                        print("parts=", parts)
+                        # print("parts=", parts)
                         a1 = int(parts[1].strip())
-                        c_program.append([0, 'side_set_count', 0, 0, a1])
+                        c_program.append([0, 'sideset_count', a1])
                         a2 = parts[2].strip().lower() == 'true'
-                        c_program.append([0, 'side_set_opt', 0, 0, a2])
+                        c_program.append([0, 'sideset_opt', a2])
                         a3 = parts[3].split(')')[0].strip().lower() == 'true'
-                        c_program.append([0, 'side_set_pindirs', 0, 0, a3])
+                        c_program.append([0, 'sideset_pindirs', a3])
                     line2 = pio_file.readline()
             line = pio_file.readline()
     if len(pio_program) != pio_program_length:
@@ -92,7 +91,7 @@ def process_file_c_program(filename, c_program):
                         parts[index] = parts[index].strip()
                 c_program.append(parts)
             line = c_program_file.readline()
-    return c_program
+    # return c_program
 
 
 if __name__ == "__main__":

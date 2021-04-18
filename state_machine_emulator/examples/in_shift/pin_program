@@ -1,0 +1,40 @@
+# timestamp, pinnumber, state
+# timestamp 0 is the first clock
+# pinnumber = all means all GPIOs
+# pinnumber = GPIOx means pin x
+# state = -1 means not driven externally
+# state = 0 means driven low externally
+# state = 1 means driven high externally
+0, all, -1
+0, GPIO0, 1
+0, GPIO1, 1
+0, GPIO2, 1
+0, GPIO3, 1
+1, GPIO0, 0
+1, GPIO1, 0
+1, GPIO2, 0
+1, GPIO3, 0
+2, GPIO0, 1
+2, GPIO1, 1
+2, GPIO2, 1
+2, GPIO3, 0
+3, GPIO0, 0
+3, GPIO1, 0
+3, GPIO2, 0
+3, GPIO3, 1
+10, GPIO10, 0
+10, GPIO11, 0
+10, GPIO12, 0
+10, GPIO13, 0
+11, GPIO10, 1
+11, GPIO11, 1
+11, GPIO12, 1
+11, GPIO13, 1
+12, GPIO10, 1
+12, GPIO11, 0
+12, GPIO12, 0
+12, GPIO13, 0
+13, GPIO10, 0
+13, GPIO11, 1
+13, GPIO12, 1
+13, GPIO13, 1

@@ -1,87 +1,87 @@
 # timestamp, command, arguments of command
-0, sm_config_set_in_pins, 0
-0, sm_config_set_jmp_pin, 0
-5, pio_sm_get_pc, 0, 0
-10, pio_sm_get_pc, 0, 0
-15, pio_sm_get_pc, 0, 0
-20, pio_sm_get_pc, 0, 0
-21, pio_sm_get_pc, 0, 0
-22, pio_sm_get_pc, 0, 0
-23, pio_sm_get_pc, 0, 0
-25, pio_sm_get_pc, 0, 0
-30, pio_sm_get_pc, 0, 0
-35, pio_sm_get_pc, 0, 0
-40, pio_sm_get_pc, 0, 0
-45, pio_sm_get_pc, 0, 0
-50, pio_sm_get_pc, 0, 0
-55, pio_sm_get_pc, 0, 0
-60, pio_sm_get_pc, 0, 0
-65, pio_sm_get_pc, 0, 0
-70, pio_sm_get_pc, 0, 0
-75, pio_sm_get_pc, 0, 0
-80, pio_sm_get_pc, 0, 0
-85, pio_sm_get_pc, 0, 0
-110, pio_sm_get_pc, 0, 0
-115, pio_sm_get_pc, 0, 0
-120, pio_sm_get_pc, 0, 0
-125, pio_sm_get_pc, 0, 0
-130, pio_sm_get_pc, 0, 0
-135, pio_sm_get_pc, 0, 0
-140, pio_sm_get_pc, 0, 0
-145, pio_sm_get_pc, 0, 0
-150, pio_sm_get_pc, 0, 0
-155, pio_sm_get_pc, 0, 0
-160, pio_sm_get_pc, 0, 0
-165, pio_sm_get_pc, 0, 0
-170, pio_sm_get_pc, 0, 0
-175, pio_sm_get_pc, 0, 0
-180, pio_sm_get_pc, 0, 0
-185, pio_sm_get_pc, 0, 0
-210, pio_sm_get_pc, 0, 0
-215, pio_sm_get_pc, 0, 0
-220, pio_sm_get_pc, 0, 0
-225, pio_sm_get_pc, 0, 0
-230, pio_sm_get_pc, 0, 0
-235, pio_sm_get_pc, 0, 0
-240, pio_sm_get_pc, 0, 0
-245, pio_sm_get_pc, 0, 0
-250, pio_sm_get_pc, 0, 0
-255, pio_sm_get_pc, 0, 0
-260, pio_sm_get_pc, 0, 0
-265, pio_sm_get_pc, 0, 0
-270, pio_sm_get_pc, 0, 0
-275, pio_sm_get_pc, 0, 0
-280, pio_sm_get_pc, 0, 0
-285, pio_sm_get_pc, 0, 0
-310, pio_sm_get_pc, 0, 0
-315, pio_sm_get_pc, 0, 0
-320, pio_sm_get_pc, 0, 0
-325, pio_sm_get_pc, 0, 0
-330, pio_sm_get_pc, 0, 0
-335, pio_sm_get_pc, 0, 0
-340, pio_sm_get_pc, 0, 0
-345, pio_sm_get_pc, 0, 0
-350, pio_sm_get_pc, 0, 0
-355, pio_sm_get_pc, 0, 0
-360, pio_sm_get_pc, 0, 0
-365, pio_sm_get_pc, 0, 0
-370, pio_sm_get_pc, 0, 0
-375, pio_sm_get_pc, 0, 0
-380, pio_sm_get_pc, 0, 0
-385, pio_sm_get_pc, 0, 0
-410, pio_sm_get_pc, 0, 0
-415, pio_sm_get_pc, 0, 0
-420, pio_sm_get_pc, 0, 0
-425, pio_sm_get_pc, 0, 0
-430, pio_sm_get_pc, 0, 0
-435, pio_sm_get_pc, 0, 0
-440, pio_sm_get_pc, 0, 0
-445, pio_sm_get_pc, 0, 0
-450, pio_sm_get_pc, 0, 0
-455, pio_sm_get_pc, 0, 0
-460, pio_sm_get_pc, 0, 0
-465, pio_sm_get_pc, 0, 0
-470, pio_sm_get_pc, 0, 0
-475, pio_sm_get_pc, 0, 0
-480, pio_sm_get_pc, 0, 0
-485, pio_sm_get_pc, 0, 0
+0, in_base, 0
+0, jmp_pin, 0
+5, get_pc
+10, get_pc
+15, get_pc
+20, get_pc
+21, get_pc
+22, get_pc
+23, get_pc
+25, get_pc
+30, get_pc
+35, get_pc
+40, get_pc
+45, get_pc
+50, get_pc
+55, get_pc
+60, get_pc
+65, get_pc
+70, get_pc
+75, get_pc
+80, get_pc
+85, get_pc
+110, get_pc
+115, get_pc
+120, get_pc
+125, get_pc
+130, get_pc
+135, get_pc
+140, get_pc
+145, get_pc
+150, get_pc
+155, get_pc
+160, get_pc
+165, get_pc
+170, get_pc
+175, get_pc
+180, get_pc
+185, get_pc
+210, get_pc
+215, get_pc
+220, get_pc
+225, get_pc
+230, get_pc
+235, get_pc
+240, get_pc
+245, get_pc
+250, get_pc
+255, get_pc
+260, get_pc
+265, get_pc
+270, get_pc
+275, get_pc
+280, get_pc
+285, get_pc
+310, get_pc
+315, get_pc
+320, get_pc
+325, get_pc
+330, get_pc
+335, get_pc
+340, get_pc
+345, get_pc
+350, get_pc
+355, get_pc
+360, get_pc
+365, get_pc
+370, get_pc
+375, get_pc
+380, get_pc
+385, get_pc
+410, get_pc
+415, get_pc
+420, get_pc
+425, get_pc
+430, get_pc
+435, get_pc
+440, get_pc
+445, get_pc
+450, get_pc
+455, get_pc
+460, get_pc
+465, get_pc
+470, get_pc
+475, get_pc
+480, get_pc
+485, get_pc

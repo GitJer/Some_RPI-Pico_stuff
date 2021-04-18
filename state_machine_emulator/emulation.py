@@ -6,8 +6,8 @@ class emulation:
     """ This class controls the emulation of the sm of a RP2040 """
 
     def __init__(self, rp2040, pin_program, c_program):
-        """ init makes the list with the emulation results (output) and 
-            the variables needed for highlights in the GUI 
+        """ init makes the list with the emulation results (output) and
+            the variables needed for highlights in the GUI
         """
         # the emulator for the RP2040:
         self.rp2040 = rp2040
@@ -84,55 +84,61 @@ class emulation:
                 # just a shortcut TODO: now only pio0 and sm0, but there are 2*PIO + 4*sm per PIO
                 sm = self.rp2040.PIO[0].sm[0]
                 # handle all possible c_statements
-                if c[1] == 'pio_sm_put':
+                if c[1] == 'put':
                     # place a value in the Tx FIFO
                     if sm.vars["TxFIFO_count"] < 3:
-                        sm.vars["TxFIFO"][sm.vars["TxFIFO_count"]] = c[4]
+                        sm.vars["TxFIFO"][sm.vars["TxFIFO_count"]] = c[2]
                         sm.vars["TxFIFO_count"] += 1
-                elif c[1] == 'pio_sm_get':
+                elif c[1] == 'get':
                     # get a value from the Rx FIFO, and put it in output
                     if sm.vars["RxFIFO_count"] > 0:
                         self.emulation_highlight_output_c_program.append(
                             len(self.emulation_output_c_program))
                         self.emulation_output_c_program.append(
                             str(time) + " : " + str(sm.vars["RxFIFO"][0]) + " = " + self.bit_string(sm.vars["RxFIFO"][0]))
-                        for i in range(sm.vars["RxFIFO_count"]-1):
+                        # shift FIFO entries 1 to 4 back one place
+                        for i in range(0, 3):
                             sm.vars["RxFIFO"][i] = sm.vars["RxFIFO"][i+1]
+                        # set the last entry to 0 (this may not happen in reality!)
+                        sm.vars["RxFIFO"][3] = 0
+                        # there is now one less item in the Rx FIFO
                         sm.vars["RxFIFO_count"] -= 1
                 elif c[1] == 'set_base':
-                    sm.settings["set_base"] = c[4]
+                    sm.settings["set_base"] = c[2]
                 elif c[1] == 'set_count':
-                    sm.settings["set_count"] = c[4]
+                    sm.settings["set_count"] = c[2]
                 elif c[1] == 'in_base':
-                    sm.settings["in_base"] = c[4]
+                    sm.settings["in_base"] = c[2]
                 elif c[1] == 'jmp_pin':
-                    sm.settings["jmp_pin"] = c[4]
+                    sm.settings["jmp_pin"] = c[2]
                 elif c[1] == 'sideset_base':
-                    sm.settings["side_set_base"] = c[4]
+                    sm.settings["sideset_base"] = c[2]
                 elif c[1] == 'sideset_count':
-                    sm.settings["side_set_count"] = c[4]
-                elif c[1] == 'side_set_opt':
-                    sm.settings["side_set_opt"] = c[4]
-                elif c[1] == 'side_set_pindirs':
-                    sm.settings["side_set_pindirs"] = c[4]
+                    sm.settings["sideset_count"] = c[2]
+                elif c[1] == 'sideset_opt':
+                    sm.settings["sideset_opt"] = c[2]
+                elif c[1] == 'sideset_pindirs':
+                    sm.settings["sideset_pindirs"] = c[2]
                 elif c[1] == 'out_base':
-                    sm.settings["out_base"] = c[4]
+                    sm.settings["out_base"] = c[2]
                 elif c[1] == 'out_count':
-                    sm.settings["out_count"] = c[4]
+                    sm.settings["out_count"] = c[2]
                 elif c[1] == 'out_shift_right':
-                    sm.settings["out_shift_right"] = c[4]
-                elif c[1] == 'sm_config_set_in_shift':      # TODO: not as c-code but just a name
+                    sm.settings["out_shift_right"] = c[2]
+                elif c[1] == 'out_shift_autopull':
+                    sm.settings["out_shift_autopull"] = c[2]
+                elif c[1] == 'pull_threshold':
+                    sm.settings["pull_threshold"] = c[2]
+                elif c[1] == 'in_shift_right':
                     sm.settings["in_shift_right"] = c[2]
-                    sm.settings["in_shift_autopush"] = c[3]
-                    sm.settings["in_shift_push_threshold"] = c[4]
-                elif c[1] == 'pio_sm_get_pc':
+                elif c[1] == 'in_shift_autopush':
+                    sm.settings["in_shift_autopush"] = c[2]
+                elif c[1] == 'push_threshold':
+                    sm.settings["push_threshold"] = c[2]
+                elif c[1] == 'get_pc':
                     self.emulation_highlight_output_c_program.append(
                         len(self.emulation_output_c_program))
                     self.emulation_output_c_program.append(str(
-                        time) + " : " + "pc=" + str(self.rp2040.PIO[c[2]].sm[c[3]].vars["pc"]))
-                elif c[1] == 'sm_config_set_in_pins':
-                    sm.settings["sm_config_set_in_pins"] = c[2]
-                elif c[1] == 'sm_config_set_jmp_pin':
-                    sm.settings["sm_config_set_jmp_pin"] = c[2]
+                        time) + " : " + "pc=" + str(self.rp2040.PIO[0].sm[0].vars["pc"]))  # TODO: only support pio0 and sm0
                 else:
                     print("Error: unknown c-program statement, continuing")

@@ -40,12 +40,20 @@ def update_left_frame(self):
 
     # highlight the just executed pin_program statements
     self.pin_program_listbox.value_listbox.selection_clear(0, END)
+    # make sure the first highlighted item is visible by using 'see'
+    first = True
     for index in self.emulation_results[self.current_clock][5]:
         self.pin_program_listbox.value_listbox.selection_set(index)
-        self.pin_program_listbox.value_listbox.see(index)
+        if first:
+            self.pin_program_listbox.value_listbox.see(index)
+            first = False
 
     # highlight the just executed c_program statements
     self.c_program_listbox.value_listbox.selection_clear(0, END)
+    # make sure the first highlighted item is visible by using 'see'
+    first = True
     for index in self.emulation_results[self.current_clock][6]:
         self.c_program_listbox.value_listbox.selection_set(index)
-        self.c_program_listbox.value_listbox.see(index)
+        if first:
+            self.c_program_listbox.value_listbox.see(index)
+            first = False

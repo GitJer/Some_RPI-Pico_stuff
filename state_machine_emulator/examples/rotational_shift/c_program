@@ -1,76 +1,75 @@
 # timestamp, command, arguments of command
-0, sm_config_set_in_pins, 0
-0, pio_sm_put, 0, 0, 1234567890
-10, pio_sm_get, 0, 0
-15, pio_sm_get, 0, 0
-20, pio_sm_get, 0, 0
-25, pio_sm_get, 0, 0
-30, pio_sm_get, 0, 0
-35, pio_sm_get, 0, 0
-40, pio_sm_get, 0, 0
-45, pio_sm_get, 0, 0
-50, pio_sm_get, 0, 0
-60, pio_sm_get, 0, 0
-65, pio_sm_get, 0, 0
-70, pio_sm_get, 0, 0
-75, pio_sm_get, 0, 0
-80, pio_sm_get, 0, 0
-85, pio_sm_get, 0, 0
-90, pio_sm_get, 0, 0
-95, pio_sm_get, 0, 0
-100, pio_sm_get, 0, 0
-105, pio_sm_get, 0, 0
-110, pio_sm_get, 0, 0
-115, pio_sm_get, 0, 0
-120, pio_sm_get, 0, 0
-125, pio_sm_get, 0, 0
-130, pio_sm_get, 0, 0
-135, pio_sm_get, 0, 0
-140, pio_sm_get, 0, 0
-145, pio_sm_get, 0, 0
-150, pio_sm_get, 0, 0
-160, pio_sm_get, 0, 0
-165, pio_sm_get, 0, 0
-170, pio_sm_get, 0, 0
-175, pio_sm_get, 0, 0
-180, pio_sm_get, 0, 0
-185, pio_sm_get, 0, 0
-190, pio_sm_get, 0, 0
-195, pio_sm_get, 0, 0
-200, pio_sm_get, 0, 0
-205, pio_sm_get, 0, 0
-210, pio_sm_get, 0, 0
-215, pio_sm_get, 0, 0
-220, pio_sm_get, 0, 0
-225, pio_sm_get, 0, 0
-230, pio_sm_get, 0, 0
-235, pio_sm_get, 0, 0
-240, pio_sm_get, 0, 0
-245, pio_sm_get, 0, 0
-250, pio_sm_get, 0, 0
-260, pio_sm_get, 0, 0
-265, pio_sm_get, 0, 0
-270, pio_sm_get, 0, 0
-275, pio_sm_get, 0, 0
-280, pio_sm_get, 0, 0
-285, pio_sm_get, 0, 0
-290, pio_sm_get, 0, 0
-295, pio_sm_get, 0, 0
-300, pio_sm_get, 0, 0
-305, pio_sm_get, 0, 0
-310, pio_sm_get, 0, 0
-315, pio_sm_get, 0, 0
-320, pio_sm_get, 0, 0
-325, pio_sm_get, 0, 0
-330, pio_sm_get, 0, 0
-335, pio_sm_get, 0, 0
-340, pio_sm_get, 0, 0
-345, pio_sm_get, 0, 0
-350, pio_sm_get, 0, 0
-360, pio_sm_get, 0, 0
-365, pio_sm_get, 0, 0
-370, pio_sm_get, 0, 0
-375, pio_sm_get, 0, 0
-380, pio_sm_get, 0, 0
-385, pio_sm_get, 0, 0
-390, pio_sm_get, 0, 0
+0, put, 1234567890
+10, get
+15, get
+20, get
+25, get
+30, get
+35, get
+40, get
+45, get
+50, get
+60, get
+65, get
+70, get
+75, get
+80, get
+85, get
+90, get
+95, get
+100, get
+105, get
+110, get
+115, get
+120, get
+125, get
+130, get
+135, get
+140, get
+145, get
+150, get
+160, get
+165, get
+170, get
+175, get
+180, get
+185, get
+190, get
+195, get
+200, get
+205, get
+210, get
+215, get
+220, get
+225, get
+230, get
+235, get
+240, get
+245, get
+250, get
+260, get
+265, get
+270, get
+275, get
+280, get
+285, get
+290, get
+295, get
+300, get
+305, get
+310, get
+315, get
+320, get
+325, get
+330, get
+335, get
+340, get
+345, get
+350, get
+360, get
+365, get
+370, get
+375, get
+380, get
+385, get
+390, get

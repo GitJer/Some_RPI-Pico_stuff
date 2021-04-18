@@ -53,11 +53,14 @@ class Interface_Item_Pin_Settings_32:
         count = 0
         if self.count_name:
             count = self.var[clock][self.var_index][self.count_name]
+            # dirty hack: sideset_count includes the sideset_opt bit, but this does not set a pin!
+            if self.count_name == "sideset_count" and self.var[clock][self.var_index]["sideset_opt"]:
+                count -= 1
         value_string_list = ['.' for i in range(32)]
         if base >= 0:
-            value_string_list[base] = 'B'
+            value_string_list[31-base] = 'B'
         for i in range(count-1):
-            value_string_list[(base+1+i) % 32] = 'C'
+            value_string_list[31-(base+1+i) % 32] = 'C'
         value_string = str()
         for v in value_string_list:
             value_string += v
@@ -142,11 +145,12 @@ class Interface_Item_Listbox_Time:
 
     def value_string(self, index):
         value_string = str(self.var[index][0]) + \
-            " : " + self.var[index][1] + "("
+            " : " + self.var[index][1]
+        # " : " + self.var[index][1] + "="
         first = True
         for l in self.var[index][2:]:
-            value_string += "" if first else ", "
+            value_string += "=" if first else ", "
             first = False
             value_string += str(l)
-        value_string += ")"
+        # value_string += ")"
         return value_string

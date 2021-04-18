@@ -77,22 +77,22 @@ def build_mid_frame(self):
 
     # IN_pins
     self.in_pins_label = Interface_Item_Pin_Settings_32(
-        "IN pins", "in_base", None, self.mid_frame, grid_row, 1, self.emulation_results, 3)
+        "in pins", "in_base", None, self.mid_frame, grid_row, 1, self.emulation_results, 3)
     grid_row += 1
 
     # OUT_PINS
     self.out_pins_label = Interface_Item_Pin_Settings_32(
-        "OUT pins", "out_base", "out_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
+        "out pins", "out_base", "out_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
     grid_row += 1
 
     # SET_PINS
     self.set_pins_label = Interface_Item_Pin_Settings_32(
-        "SET pins", "set_base", "set_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
+        "set pins", "set_base", "set_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
     grid_row += 1
 
-    # SIDE_SET_PINS
+    # SIDESET_PINS
     self.sideset_pins_label = Interface_Item_Pin_Settings_32(
-        "SIDESET pins", "side_set_base", "side_set_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
+        "sideset pins", "sideset_base", "sideset_count", self.mid_frame, grid_row, 1, self.emulation_results, 3)
     grid_row += 1
 
     # JMP_PIN
@@ -104,7 +104,7 @@ def build_mid_frame(self):
     # TODO: update
     # only some settings are to be displayed
     list_of_settings_to_be_displayed = [
-        "in_shift_right", "in_shift_autopush", "push_threshold", "out_shift_right", "out_shift_autopull", "pull_threshold", "side_set_opt", "side_set_pindirs"]
+        "in_shift_right", "in_shift_autopush", "push_threshold", "out_shift_right", "out_shift_autopull", "pull_threshold", "sideset_opt", "sideset_pindirs"]
     temp = Label(self.mid_frame, text="Settings=")
     temp.grid(row=grid_row, column=1, padx=(10, 10), sticky=W)
     self.settings_listbox = Listbox(self.mid_frame, height=10, width=40)

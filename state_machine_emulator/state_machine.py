@@ -33,15 +33,10 @@ class state_machine:
         self.settings["in_shift_right"] = True  # right
         self.settings["in_shift_autopush"] = False
         self.settings["push_threshold"] = 32  # false
-        self.settings["out_shift_right"] = True  # right #TODO:
+        self.settings["out_shift_right"] = True  # right
         self.settings["out_shift_autopull"] = False
         self.settings["pull_threshold"] = 32  # false
-        # self.settings["out_special_sticky"] = 0  # TODO:false
-        # self.settings["out_special_has_enable_pin"] = 0  # TODO:false
-        # self.settings["out_special_enable_pin_index"] = 0  # TODO:
-        # self.settings["mov_status_sel"] = 0  # TODO:STATUS_TX_LESSTHAN
-        # self.settings["mov_status_n"] = 0     # TODO:
-        # TODO: is this a variable? is it used at all?
+        # TODO: is this a variable? setting status is not implemented yet
         self.settings["status"] = -1
         self.settings["in_base"] = -1
         self.settings["jmp_pin"] = -1
@@ -49,13 +44,10 @@ class state_machine:
         self.settings["set_count"] = 0
         self.settings["out_base"] = -1
         self.settings["out_count"] = 0
-        self.settings["side_set_base"] = -1
-        self.settings["side_set_count"] = 0
-        self.settings["side_set_opt"] = False
-        self.settings["side_set_pindirs"] = False
-        # self.settings["side_set"] = 0  # disabled
-        # self.settings["PINCTRL_IN_BASE"] = 0
-        # self.settings["FDEBUG_RXSTALL"] = 0
+        self.settings["sideset_base"] = -1
+        self.settings["sideset_count"] = 0
+        self.settings["sideset_opt"] = False
+        self.settings["sideset_pindirs"] = False
 
         # for e.g. jmp the pc should not be updated after an execution step since it is set by the jmp
         # also for e.g. wait statements the pc should remain unchanged
@@ -128,44 +120,48 @@ class state_machine:
         instruction_type = (instruction & 0xE000) >> 13
         # get the five delay/side-set bits
         instruction_delay_side_step = (instruction & 0x1F00) >> 8
-        # the bits for delay is 5 minus the number of side_set pins
-        # and if side_set_opt is True, the MSB should be set, leaving one less bit for delay
+
+        # determine the (optional) delay
+        # the bits for delay is 5 minus the number of sideset pins
+        # and if sideset_opt is True, the MSB should be set, leaving one less bit for delay
         bits_for_delay = 5 - \
-            self.settings["side_set_count"] - \
-            (1 if self.settings["side_set_opt"] else 0)
+            self.settings["sideset_count"] - \
+            (1 if self.settings["sideset_opt"] else 0)
         # delay is the bits_for_delay LSB of instruction_del_ss
         self.vars["delay"] = instruction_delay_side_step & (
             (1 << bits_for_delay) - 1)
-        # if side_set is optional the MSB is set when side_set should be executed:
-        if self.settings["side_set_opt"]:
+
+        # determine and execute the (optional) sideset
+        # if sideset is optional the MSB is set when sideset should be executed:
+        if self.settings["sideset_opt"]:
             # check if the MSB is set
             if instruction_delay_side_step & 0x10:
-                # do the side step for side_set_count bits after the MSB
-                # note: side_set_count include the optional bit!
-                for i in range(self.settings["side_set_count"]-1):
+                # do the side step for sideset_count bits after the MSB
+                # note: sideset_count includes the optional bit!
+                for i in range(self.settings["sideset_count"]-1):
                     test_ss_bit = 4-i-1
                     value = 1 if instruction_delay_side_step & (
                         1 << test_ss_bit) else 0
-                    # do the side step for side_set_base + i
-                    if self.settings["side_set_pindirs"]:
+                    # do the side step for sideset_base + i
+                    if self.settings["sideset_pindirs"]:
                         self.rp2040.GPIO_pindirs[(
-                            self.settings["side_set_base"] + i) % 32] = value
+                            self.settings["sideset_base"] + i) % 32] = value
                     else:
                         self.rp2040.GPIO[(
-                            self.settings["side_set_base"] + i) % 32] = value
-        else:  # side_set is mandatory
-            for i in range(self.settings["side_set_count"]):
+                            self.settings["sideset_base"] + i) % 32] = value
+        else:  # sideset is mandatory
+            for i in range(self.settings["sideset_count"]):
                 test_ss_bit = 5-i-1
                 # if the bit is set, the GPIO (or pindir) has to be set; if not: clear the GPIO/pindir
                 value = 1 if instruction_delay_side_step & (
                     1 << test_ss_bit) else 0
-                # do the side step for side_set_base + i
-                if self.settings["side_set_pindirs"]:
+                # do the side step for sideset_base + i
+                if self.settings["sideset_pindirs"]:
                     self.rp2040.GPIO_pindirs[(
-                        self.settings["side_set_base"] + i) % 32] = value
+                        self.settings["sideset_base"] + i) % 32] = value
                 else:
                     self.rp2040.GPIO[(
-                        self.settings["side_set_base"] + i) % 32] = value
+                        self.settings["sideset_base"] + i) % 32] = value
 
         is_pull = 1 if (instruction & (1 << 7)) > 0 else 0
 
@@ -189,7 +185,7 @@ class state_machine:
         elif instruction_type == 7:                 # its a 'set'
             self.execute_set(instruction)
         else:                                       # its an error!
-            print("Error: execute_instruction: unknown instruction, continuing anyway")
+            print("Error: execute_instruction: unknown instruction, continuing")
 
     def execute_jmp(self, instruction):
         """ execute a jmp instruction """
@@ -237,7 +233,7 @@ class state_machine:
             if self.rp2040.GPIO[index] != polarity:
                 is_not_met = True
         elif source == 1:           # pin
-            if self.rp2040.GPIO[self.settings["in_base"]+index] != polarity:
+            if self.rp2040.GPIO[(self.settings["in_base"]+index) % 32] != polarity:
                 is_not_met = True
         elif source == 2:           # IRQ
             MSB = 1 if (instruction & (1 << 4)) > 0 else 0
@@ -248,7 +244,7 @@ class state_machine:
             if self.rp2040.PIO[0].sm_irq[irq] != polarity:
                 is_not_met = True
         else:
-            print("Error: wait unknown source")
+            print("Error: wait instruction has unknown source, continuing")
 
         if is_not_met:
             # condition has not been met, keep waiting
@@ -265,7 +261,7 @@ class state_machine:
         value = 0
         mask = (1 << bit_count) - 1
         if source == 0:     # PINS
-            for pin in range(self.settings["in_count"]):
+            for pin in range(bit_count):
                 value |= (self.rp2040.GPIO[(
                     self.settings["in_base"] + pin) % 32] << pin)
         elif source == 1:   # X
@@ -275,25 +271,29 @@ class state_machine:
         elif source == 3:   # NULL
             value = 0
         elif source == 4:   # reserved
-            print("Error: execute_mov: unknown source, skipping")
+            print("Error: execute_mov: unknown source, continuing")
             return
         elif source == 5:   # reserved
-            print("Error: execute_mov: unknown source, skipping")
+            print("Error: execute_mov: unknown source, continuing")
             return
         elif source == 6:   # ISR
             value = self.vars["ISR"] & mask
         elif source == 7:   # OSR
             value = self.vars["OSR"] & mask
         else:               # Error
-            print("Error: execute_mov: unknown source, skipping")
+            print("Error: execute_mov: unknown source, continuing")
             return
-        self.vars["ISR_shift_counter"] += bit_count
+        # shift into ISR
         if self.settings["in_shift_right"]:  # shift right
             self.vars["ISR"] >>= bit_count
             self.vars["ISR"] |= value << (32-bit_count)
         else:  # shift left
             self.vars["ISR"] <<= bit_count
             self.vars["ISR"] |= value
+        # make sure it the ISR stays 32 bit
+        self.vars["ISR"] &= 0xFFFFFFFF
+        # adjust the shift counter
+        self.vars["ISR_shift_counter"] += bit_count
 
     def execute_out(self, instruction):
         """ execute an out instruction """
@@ -302,8 +302,14 @@ class state_machine:
         if bit_count == 0:
             bit_count = 32
 
-        # shift to the left  #TODO: switch with left to remove the 'not'
-        if not self.settings["out_shift_right"]:
+        # shift to the left
+        if self.settings["out_shift_right"]:
+            # take the bit_count LSB
+            mask = (1 << bit_count)-1
+            value = self.vars["OSR"] & mask
+            # shift the OSR bit_count to the right
+            self.vars["OSR"] >>= bit_count
+        else:   # shift to the right
             # take the bit_count MSB by making a mask and shifting it left
             mask = (1 << bit_count)-1
             # shift them (32-bit_count) to the left
@@ -312,18 +318,10 @@ class state_machine:
             value = self.vars["OSR"] & mask
             # shift value back
             value >>= (32-bit_count)
-            # shift the OSR bit_count to the right
-            self.vars["OSR"] <<= bit_count
-            # make sure it the OSR stays 32 bit
-            self.vars["OSR"] &= 0xFFFFFFFF
-        else:   # shift to the right
-            # take the bit_count LSB
-            mask = (1 << bit_count)-1
-            value = self.vars["OSR"] & mask
             # shift the OSR bit_count to the left
-            self.vars["OSR"] >>= bit_count
-            # make sure it the OSR stays 32 bit
-            self.vars["OSR"] &= 0xFFFFFFFF
+            self.vars["OSR"] <<= bit_count
+        # make sure it the OSR stays 32 bit
+        self.vars["OSR"] &= 0xFFFFFFFF
         # adjust the shift counter
         self.vars["OSR_shift_counter"] += bit_count
 
@@ -354,7 +352,7 @@ class state_machine:
             # TODO:
             pass
         else:                   # Error
-            print("Error: execute_out: unknown destination, skipping")
+            print("Error: execute_out: unknown destination, continuing")
             return
 
     def execute_push(self, instruction):
@@ -363,9 +361,13 @@ class state_machine:
         ifE = 1 if (instruction & (1 << 6)) > 0 else 0
         Blk = 1 if (instruction & (1 << 5)) > 0 else 0
 
+        # check if there is space in the FIFO
         if self.vars["RxFIFO_count"] < 4:
+            # place the new item after the data already in the FIFO
             self.vars["RxFIFO"][self.vars["RxFIFO_count"]] = self.vars["ISR"]
+            # there is now one more item
             self.vars["RxFIFO_count"] += 1
+            # clear the shift counter and the ISR itself
             self.vars["ISR_shift_counter"] = 0
             self.vars["ISR"] = 0
         else:
@@ -388,6 +390,8 @@ class state_machine:
             # shift the whole TxFIFO
             for t in range(self.vars["TxFIFO_count"]):
                 self.vars["TxFIFO"][t] = self.vars["TxFIFO"][t+1]
+            # set the now open space in the TxFIFO to 0
+            self.vars["TxFIFO"][t+1] = 0
             # there is now one less data item in the TxFIFO
             self.vars["TxFIFO_count"] -= 1
             # the number of bits shifted out of the OSR is 0
@@ -411,7 +415,7 @@ class state_machine:
         # get the source (i.e. set 'value')
         if source == 0:     # PINS
             value = 0
-            for pin in range(self.settings["in_count"]):
+            for pin in range(32):
                 value |= (self.rp2040.GPIO[(
                     self.settings["in_base"] + pin) % 32] << pin)
         elif source == 1:   # X
@@ -421,16 +425,17 @@ class state_machine:
         elif source == 3:   # NULL
             value = 0
         elif source == 4:   # reserved
-            print("Error: execute_mov: unknown source, skipping")
+            print("Error: execute_mov: unknown source, continuing")
             return
-        elif source == 5:   # status
+        # status TODO: status is never set (EXECCTRL_STATUS_SEL)
+        elif source == 5:
             value = self.settings["status"]
         elif source == 6:   # ISR
             value = self.vars["ISR"]
         elif source == 7:   # OSR
             value = self.vars["OSR"]
         else:               # Error
-            print("Error: execute_mov: unknown source, skipping")
+            print("Error: execute_mov: unknown source, continuing")
 
         # apply the operation on value
         if operation == 1:      # invert (bitwise complement)
@@ -445,7 +450,8 @@ class state_machine:
 
         # place value in destination
         # get the source (i.e. set 'value')
-        if destination == 0:     # PINS
+        # PINS TODO: check if it is correct that only out_count bits are output (not 32)?
+        if destination == 0:
             for pin in range(self.settings["out_count"]):
                 self.rp2040.GPIO[(
                     self.settings["out_base"] + pin) % 32] = value & (1 << pin)
@@ -454,7 +460,7 @@ class state_machine:
         elif destination == 2:   # Y
             self.vars["y"] = value
         elif destination == 3:   # reserved
-            print("Error: execute_mov: unknown destination, skipping")
+            print("Error: execute_mov: unknown destination, continuing")
             return
         elif destination == 4:   # EXEC
             # TODO:
@@ -472,7 +478,7 @@ class state_machine:
             self.vars["OSR"] = value
             self.vars["OSR_shift_counter"] = 0
         else:               # Error
-            print("Error: execute_mov: unknown destination, skipping")
+            print("Error: execute_mov: unknown destination, continuing")
             return
 
     def execute_irq(self, instruction):
@@ -517,4 +523,4 @@ class state_machine:
                 self.rp2040.GPIO_pindirs[(
                     self.settings["set_base"] + pin) % 32] = data & (1 << pin)
         else:
-            print("Error: execute_set: unknown destination")
+            print("Error: execute_set: unknown destination, continuing")
