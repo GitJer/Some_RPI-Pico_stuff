@@ -6,6 +6,9 @@ This repository contains bits and pieces that I made while trying to figure out 
 
 The following projects are contained in this repository:
 
+## State machine emulator
+The problem with the state machines is that debuggers do not give the insight I need when writing code for a sm. I typically write some code, upload it to the pico and find that it doesn't do what I want it to do. Instead of guessing what I do wrong, I would like to see the values of e.g. the registers when the sm is executing. So, I made an [emulator](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/state_machine_emulator).
+
 ## Two independently running state machines 
 [This](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/Two_sm_simple) is just an example of two state machines running independently. Nothing special about it, but I had to do it.
 
