@@ -16,7 +16,9 @@ def process_file_pio_h(filename):
     with open(filename, 'r') as pio_file:
         line = pio_file.readline()
         while line:
-            if ".length" in line:
+            if line[0] == '/' and line[1] == '/':
+                pass
+            elif ".length" in line:
                 d = line.strip().split('=')
                 pio_program_length = int(d[1].replace(',', ''))
             elif ".origin" in line:

@@ -61,7 +61,7 @@ def build_mid_frame(self):
     grid_row += 1
 
     # GPIO # TODO: indicate externally or internally driven?
-    # e.g. -1 (not driven), H (externally driven), 1 (internally driven), L (external), 0 (internal), E (conflict between internal and exteral)
+    # e.g. -1 (not driven), H (externally driven), 1 (internally driven), L (external), 0 (internal), E (conflict between internal and external)
     self.GPIO_label = Interface_Item_Var_List(
         "GPIO", self.mid_frame, grid_row, 1, self.emulation_results, 0)
     grid_row += 1

@@ -64,7 +64,6 @@ class state_machine:
         if not self.delay_delay:
             if self.vars["delay"] > 0:
                 self.vars["delay"] -= 1
-                # print("doing delay")
                 return
         self.delay_delay = False
 
@@ -75,6 +74,7 @@ class state_machine:
                 self.vars["pc"] = self.jmp_to
                 self.jmp_to = -1
         else:
+            # add one to the program counter
             self.vars["pc"] += 1
             # check if the pc should wrap
             if self.vars["pc"] == self.wrap+1:
@@ -84,6 +84,9 @@ class state_machine:
         instruction = int(self.program[self.vars["pc"]][0], 16)
         self.execute_instruction(instruction)
 
+        self.do_auto_push_pull()
+
+    def do_auto_push_pull(self):
         # do auto push
         if self.settings["in_shift_autopush"] and (self.vars["ISR_shift_counter"] >= self.settings["push_threshold"]):
             if self.vars["RxFIFO_count"] < 4:
@@ -114,23 +117,7 @@ class state_machine:
                 # block: do not go to next instruction
                 self.skip_increase_pc = True
 
-    def execute_instruction(self, instruction):
-        """ Execute the PIO insruction """
-        # get the three bits that encode the instruction type
-        instruction_type = (instruction & 0xE000) >> 13
-        # get the five delay/side-set bits
-        instruction_delay_side_step = (instruction & 0x1F00) >> 8
-
-        # determine the (optional) delay
-        # the bits for delay is 5 minus the number of sideset pins
-        # and if sideset_opt is True, the MSB should be set, leaving one less bit for delay
-        bits_for_delay = 5 - \
-            self.settings["sideset_count"] - \
-            (1 if self.settings["sideset_opt"] else 0)
-        # delay is the bits_for_delay LSB of instruction_del_ss
-        self.vars["delay"] = instruction_delay_side_step & (
-            (1 << bits_for_delay) - 1)
-
+    def do_side_set(self, instruction_delay_side_step):
         # determine and execute the (optional) sideset
         # if sideset is optional the MSB is set when sideset should be executed:
         if self.settings["sideset_opt"]:
@@ -163,6 +150,22 @@ class state_machine:
                     self.rp2040.GPIO[(
                         self.settings["sideset_base"] + i) % 32] = value
 
+    def execute_instruction(self, instruction):
+        """ Execute the PIO insruction """
+        # get the three bits that encode the instruction type
+        instruction_type = (instruction & 0xE000) >> 13
+        # get the five delay/side-set bits
+        instruction_delay_side_step = (instruction & 0x1F00) >> 8
+
+        # determine the (optional) delay
+        # the bits for delay is 5 minus the number of sideset pins
+        # NOTE: the number of sideset pins specified in the pio.h file includes the opt-bit
+        bits_for_delay = 5 - self.settings["sideset_count"]
+        # delay is the bits_for_delay LSB of instruction_del_ss
+        self.vars["delay"] = instruction_delay_side_step & (
+            (1 << bits_for_delay) - 1)
+
+        self.do_side_set(instruction_delay_side_step)
         is_pull = 1 if (instruction & (1 << 7)) > 0 else 0
 
         # determine which function to execute based on the instruction_type
