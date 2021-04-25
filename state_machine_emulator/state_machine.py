@@ -59,9 +59,10 @@ class state_machine:
 
     def time_step(self):
         """ emulate one time step """
-
-        # check if a delay is being executed: if so, do nothing
+        # check if delay is active: for some instructions (wait, irq) delay needs to wait till after the
+        # instruction has finished
         if not self.delay_delay:
+            # check if a delay is being executed: if so, do nothing
             if self.vars["delay"] > 0:
                 self.vars["delay"] -= 1
                 return
