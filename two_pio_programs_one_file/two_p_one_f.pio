@@ -1,0 +1,43 @@
+
+;
+; This file contains two pio programs.
+; It is assumed that an external pull up resistor is present on the pin used by both set and side-set
+;
+; The first program produces a short 0 (two cycles) and a long 1 (nine cycles) on the output
+; the second program produces a short 1 (two cycles) and a long 0 (nine cycles) on the output
+;
+; Note that in the generated file two_p_one_f.pio.h file the two programs are 
+; considered completely separate and independent of where in memory they will end up!
+; Even the 'jmp again1' and 'jmp again2' are both encoded as a 'jmp 0'. This means
+; that when loading a program into pio memory, some trans-coding is necessary to make
+; the jmp statements point to the right memory address.
+
+
+        ; first program
+.program two_p_one_f_1
+        ; side-set controls the direction
+.side_set 1 opt pindirs
+
+again1:
+        ; set direction to output (side 1), and set output value to 0 (set pins 0)
+    set pins 0 side 1 [1]
+        ; set direction to input, if external pull-up is used, pin will float to 1
+    nop side 0
+        ; keep input for some time
+    nop [6]
+        ; start over
+    jmp again1
+
+
+        ; second program
+.program two_p_one_f_2
+        ; side-set controls the direction
+.side_set 1 opt pindirs
+
+again2:
+        ; set to output, and set the output to 0
+    set pins 0 side 1
+    nop [7]
+        ; set to input, if external pullup is used, expect line to float up
+    nop side 0
+    jmp again2
