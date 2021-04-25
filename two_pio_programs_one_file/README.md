@@ -1,5 +1,5 @@
 This example contains two pio programs.
-It was actually part of getting the 1-wire protocol working, and that requires an external pull up resistor on the pin used by both set and side-set
+It was actually part of getting the 1-wire protocol working, and that requires an external pull up resistor (e.g. 10k) on the pin used by both set and side-set.
 But for now, this is mostly an example of how two pio programs in one .pio file can be used.
 
 The first program produces a short 0 (two cycles) and a long 1 (nine cycles) on the output
