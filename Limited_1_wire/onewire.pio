@@ -1,0 +1,85 @@
+
+;
+; It is assumed that an external pull up resistor (4.7k) is present on the pin with the OneWire sensor
+;
+; ------------------------------------------------------
+        ; WAIT
+        ; When starting the sm, it should do nothing.
+.program onewire_wait
+
+onewire_wait:
+    jmp onewire_wait
+
+; ------------------------------------------------------
+        ; RESET
+.program onewire_reset
+        ; side-set controls the direction
+.side_set 1 opt pindirs
+
+onewire_reset:
+        ; side_set to input and wait until the line goes high, just in case it isn't already 1
+    wait 1 PIN 0 side 0
+        ; side_set to output and pull line low and delay for > 480 us
+    set PINS 0 [7] side 1
+        ; wait > 480 us (at 10us per step), here use 490 us
+    set x 4 [5]
+reset_wait_loop:
+    jmp x-- reset_wait_loop [6]
+        ; side_set to input, delay for 80us
+    nop [7] side 0
+        ; read the value of the line (1 = no slaves, 0 = at least one slave)
+    in PINS 1
+    push
+        ; wait until the line goes high after the slaves release the line
+    wait 1 PIN 0
+        ; end by doing nothing in a loop
+reset_stop:
+    jmp reset_stop
+
+; ------------------------------------------------------
+        ; WRITE BYTE
+.program onewire_write_byte
+.side_set 1 opt pindirs
+
+        ; get the byte to send
+    pull
+        ; set counter to 8 bits
+    set x 7
+write_byte_loop:
+        ; master pulls low for 10 us
+    set PINS 0 side 1
+        ; write whatever bit is shifted out of the OSR, keep it for 40us
+    out PINS 1 [3]
+        ; the last part (10 us) must be high TODO: jmp also takes 10 us (would not be needed)
+    set PINS 1
+        ; do 8 bits in total
+    jmp x-- write_byte_loop
+        ; end by doing nothing in a loop
+write_byte_stop:
+    jmp x-- write_byte_stop
+
+; ------------------------------------------------------
+        ; READ BYTE
+.program onewire_read_byte
+.side_set 1 opt pindirs
+
+        ; set counter to 8 bits
+    set x 7
+        ; clear the ISR
+    mov ISR NULL
+read_byte_loop:
+        ; master pulls low for 10 us
+    set PINS 0 side 1
+        ; set master to read (instruction takes 10 us)
+    nop side 0
+        ; sample the line and shift right into the ISR (LSB is read first)
+    in PINS 1
+        ; there is still some time to wait: about 50 us
+    nop [4]
+        ; do 8 bits in total
+    jmp x-- read_byte_loop
+        ; push it in the RxFIFO
+    push
+        ; end by doing nothing in a loop
+read_byte_stop:
+    jmp read_byte_stop
