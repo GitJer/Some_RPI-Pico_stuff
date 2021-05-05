@@ -56,3 +56,6 @@ I wanted to see how I could use two pio programs in one file and use them from w
 
 ## 1-wire protocol for one device 
 [This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/Limited_1_wire) is a pio implementation of the 1-wire protocol.
+
+## Blow out a(n) LED
+[This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/blow_out_a_LED) is a remake of the wonderfull little thingy made by Paul Dietz: blow on a LED to make it go out! Really!
