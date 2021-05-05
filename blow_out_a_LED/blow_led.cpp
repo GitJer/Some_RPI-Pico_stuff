@@ -1,6 +1,6 @@
 /*
 
-This is remake of the wonderfull little thingy made by Paul Dietz. See:
+This is remake of the wonderful little thingy made by Paul Dietz. See:
 https://hackaday.com/2018/08/21/an-led-you-can-blow-out-with-no-added-sensor/
 https://github.com/paulhdietz/LEDSensors/blob/master/_07_BlowOutLED/_07_BlowOutLED.ino
 
@@ -12,7 +12,7 @@ handful of millivolts — but the effect is consistent and can be measured. "
 Where his code is rather simple and elegant, mine is convoluted.
 Why? Because I wanted to play with the DMA sniffer!
 
-The DMA sniffer allowes summing of all values that pass through the DMA.
+The DMA sniffer allows summing of all values that pass through the DMA.
 So, there is no need to sum the values yourself afterwards.
 
 The code does the following:
