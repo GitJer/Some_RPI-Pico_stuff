@@ -7,7 +7,6 @@ target_sources(two_p_one_f PRIVATE two_p_one_f.cpp)
 target_link_libraries(two_p_one_f PRIVATE
         pico_stdlib
         hardware_pio
-        # hardware_dma
         )
 
 pico_add_extra_outputs(two_p_one_f)
