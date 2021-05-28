@@ -59,3 +59,9 @@ I wanted to see how I could use two pio programs in one file and use them from w
 
 ## Blow out a(n) LED
 [This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/blow_out_a_LED) is a remake of the wonderfull little thingy made by Paul Dietz: blow on a LED to make it go out! Really!
+
+## Counting pulses in a pulse train separated by a pause 
+
+[This code]() can be used for protocols where the data is encoded by a number of pulses in a pulse train followed by a pause.
+E.g. the LMT01 temperature sensor uses this, [see](https://www.reddit.com/r/raspberrypipico/comments/nis1ew/made_a_pulse_counter_for_the_lmt01_temperature/).
+

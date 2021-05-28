@@ -1,0 +1,53 @@
+
+.program count_pulses_with_pause
+
+; algorithm:
+
+; This PIO program counts the number of pulses in a pulse train.
+; In the settings used below, two pulse trains must be separated by at least 40ms
+; 
+; There are two counters:
+; One counts the number of pulses observed in a pulse train (the pulse_counter, placed in the y-register)
+; One counts how much time has passed after a pulse (the time_counter, placed in the x-register)
+; 
+; If the time_counter has measured 40ms it is assumed the pulse train has ended. 
+; Then pulse_counter is placed in the Rx FIFO and the pio program starts over.
+; 
+; 'Measuring' the 40ms is done by counting how many instructions have been executed
+; in the loop that measures if a pulse is present on the input pin.
+; The RPI pico is assumed to run at 125MHz, so 40ms is 5000000 instruction steps.
+; The test loop is 2 instructions (jmp PIN and jmp x--), so the time_counter must be 2500000.
+; Since the 40ms doesn't need to be precise, this can be approximated by placing 19 in the x and shifting in 17 zeros.
+; 2500000 in binary is 1001100010010110100000, which is approximately 10011 with 17 zeros, 10011 is 19 in decimal.
+
+start:
+        ; set pulse_counter to 0 (counting negatively!)
+    mov y ~NULL
+start_time_counter:
+        ; set time_counter to 10011 << 17
+    set x 19
+    mov ISR x
+    in NULL 17
+    mov x ISR
+test:
+        ; test if there is a pulse (a 1 on the pin)
+    jmp PIN during_pulse
+        ;  no pulse is currently observed: decrement time_counter and test again
+    jmp x-- test
+        ; time_counter has reached 0: a pause has happened
+        ; place the pulse counter in the Rx FIFO
+    mov ISR ~y
+    push
+        ; start over
+    jmp start
+
+during_pulse:
+        ;  a pulse is in progress, wait till the pulse is over
+    wait 0 PIN 0 
+        ;  increase the number of pulses observed
+    jmp y-- during_pulse2
+        ; assume y never reaches 0
+during_pulse2:
+        ;  restart the time counter
+    jmp start_time_counter
+
