@@ -1,0 +1,82 @@
+; This is a proof of principle of using subroutines in PIO code.
+
+.program subroutine
+    ; START THE PROGRAM AT ADDRESS 0
+.origin 0
+
+start:
+        ; set the return address in x, then in ISR
+    set x ret1
+    mov ISR x
+        ; set data to send in x
+    set x 0b11111
+        ; set pause time after sending bits in y
+    set y 6
+        ; jump to subroutine send_data
+    jmp send_data
+ret1:
+        ; set the return address in x, then in ISR
+    set x ret2
+    mov ISR x
+        ; set data to send in x
+    set x 0b11011
+        ; set pause time after sending bits in y
+    set y 12
+        ; jump to subroutine send_data
+    jmp send_data
+ret2:
+        ; set the return address in x, then in ISR
+    set x ret3
+    mov ISR x
+        ; set data to send in x
+    set x 0b10101
+        ; set pause time after sending bits in y
+    set y 18
+        ; jump to subroutine send_data
+    jmp send_data
+ret3:
+        ; set the return address in x, then in ISR
+    set x ret4
+    mov ISR x
+        ; set data to send in x
+    set x 0b01110
+        ; set pause time after sending bits in y
+    set y 24
+        ; jump to subroutine send_data
+    jmp send_data
+ret4:
+        ; set the return address in x, then in ISR
+    set x start
+    mov ISR x
+        ; set data to send in x
+    set x 0b10001
+        ; set pause time after sending bits in y
+    set y 30
+        ; jump to subroutine send_data
+    jmp send_data
+
+
+; The subroutine to send bits and pause for some time
+;
+; The return address used is in ISR
+; The data to be send is in x
+; The pause time is in y
+
+send_data: 
+        ; data to send is put in the OSR for shifting
+    mov OSR x
+        ; send 5 bits, x is a counter
+    set x, 4
+bitloop:
+        ; shift out 1 bit from OSR to pin
+    out pins 1
+        ; afterwards make the pin 0
+    set pins 0
+        ; do all 5 bits
+    jmp x-- bitloop
+        ; pause y+1 steps after sending the bits
+pause:  
+    jmp y-- pause
+        ; return to the address set in ISR
+    mov exec ISR
+
