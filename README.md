@@ -67,4 +67,4 @@ E.g. the LMT01 temperature sensor uses this, [see](https://www.reddit.com/r/rasp
 
 ## Subroutines in pioasm
 
-[This code]() shows that subroutines in pioasm can be a thing and can - in some cases - be used to do more with the limited memory space than is possible with just writing the code in one program.
+[This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/subroutines) shows that subroutines in pioasm can be a thing and can - in some cases - be used to do more with the limited memory space than is possible with just writing the code in one program.
