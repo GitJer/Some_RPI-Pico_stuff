@@ -8,7 +8,6 @@
 ; - I haven't implemented parity checking. Even though there is enough time: the clock_div is about 150 and the [] waits can be scaled up at least a factor 3, doing parity checking seems difficult in pio code
 ; - I haven't implemented error handling in the c-program (i.e. disabled 'irq 4 rel')
 
-;nop
 start:
     wait 1 pin 0        ; Stall until start bit is asserted
     set x, 7    [10]    ; Preload bit counter, then delay until halfway through
