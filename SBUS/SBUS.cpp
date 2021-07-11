@@ -57,19 +57,19 @@ int main()
             channels[0] = (uint16_t)((data[1 + 0] | data[1 + 1] << 8) & 0x07FF);
             channels[1] = (uint16_t)((data[1 + 1] >> 3 | data[1 + 2] << 5) & 0x07FF);
             channels[2] = (uint16_t)((data[1 + 2] >> 6 | data[1 + 3] << 2 | data[1 + 4] << 10) & 0x07FF);
-   			channels[3] = (uint16_t)((data[1 + 4] >> 1 | data[1 + 5] << 7) & 0x07FF);
-			channels[4] = (uint16_t)((data[1 + 5] >> 4 | data[1 + 6] << 4) & 0x07FF);
-			channels[5] = (uint16_t)((data[1 + 6] >> 7 | data[1 + 7] << 1 | data[1 + 8] << 9) & 0x07FF);
-			channels[6] = (uint16_t)((data[1 + 8] >> 2 | data[1 + 9] << 6) & 0x07FF);
-			channels[7] = (uint16_t)((data[1 + 9] >> 5 | data[1 + 10] << 3) & 0x07FF);
-			channels[8] = (uint16_t)((data[1 + 11] | data[1 + 12] << 8) & 0x07FF);
-			channels[9] = (uint16_t)((data[1 + 12] >> 3 | data[1 + 13] << 5) & 0x07FF);
-			channels[10] = (uint16_t)((data[1 + 13] >> 6 | data[1 + 14] << 2 | data[1 + 15] << 10) & 0x07FF);
-			channels[11] = (uint16_t)((data[1 + 15] >> 1 | data[1 + 16] << 7) & 0x07FF);
-			channels[12] = (uint16_t)((data[1 + 16] >> 4 | data[1 + 17] << 4) & 0x07FF);
-			channels[13] = (uint16_t)((data[1 + 17] >> 7 | data[1 + 18] << 1 | data[1 + 19] << 9) & 0x07FF);
-			channels[14] = (uint16_t)((data[1 + 19] >> 2 | data[1 + 20] << 6) & 0x07FF);
-			channels[15] = (uint16_t)((data[1 + 20] >> 5 | data[1 + 21] << 3) & 0x07FF);
+   	    channels[3] = (uint16_t)((data[1 + 4] >> 1 | data[1 + 5] << 7) & 0x07FF);
+   	    channels[4] = (uint16_t)((data[1 + 5] >> 4 | data[1 + 6] << 4) & 0x07FF);
+   	    channels[5] = (uint16_t)((data[1 + 6] >> 7 | data[1 + 7] << 1 | data[1 + 8] << 9) & 0x07FF);
+   	    channels[6] = (uint16_t)((data[1 + 8] >> 2 | data[1 + 9] << 6) & 0x07FF);
+   	    channels[7] = (uint16_t)((data[1 + 9] >> 5 | data[1 + 10] << 3) & 0x07FF);
+   	    channels[8] = (uint16_t)((data[1 + 11] | data[1 + 12] << 8) & 0x07FF);
+   	    channels[9] = (uint16_t)((data[1 + 12] >> 3 | data[1 + 13] << 5) & 0x07FF);
+   	    channels[10] = (uint16_t)((data[1 + 13] >> 6 | data[1 + 14] << 2 | data[1 + 15] << 10) & 0x07FF);
+   	    channels[11] = (uint16_t)((data[1 + 15] >> 1 | data[1 + 16] << 7) & 0x07FF);
+   	    channels[12] = (uint16_t)((data[1 + 16] >> 4 | data[1 + 17] << 4) & 0x07FF);
+   	    channels[13] = (uint16_t)((data[1 + 17] >> 7 | data[1 + 18] << 1 | data[1 + 19] << 9) & 0x07FF);
+   	    channels[14] = (uint16_t)((data[1 + 19] >> 2 | data[1 + 20] << 6) & 0x07FF);
+   	    channels[15] = (uint16_t)((data[1 + 20] >> 5 | data[1 + 21] << 3) & 0x07FF);
             for (int i=0; i<16; i++) {
                 printf("%d \t", channels[i]);
             }
