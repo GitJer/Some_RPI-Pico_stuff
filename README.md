@@ -61,10 +61,11 @@ I wanted to see how I could use two pio programs in one file and use them from w
 [This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/blow_out_a_LED) is a remake of the wonderfull little thingy made by Paul Dietz: blow on a LED to make it go out! Really!
 
 ## Counting pulses in a pulse train separated by a pause 
-
 [This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/count_pulses_with_pause) can be used for protocols where the data is encoded by a number of pulses in a pulse train followed by a pause.
 E.g. the LMT01 temperature sensor uses this, [see](https://www.reddit.com/r/raspberrypipico/comments/nis1ew/made_a_pulse_counter_for_the_lmt01_temperature/).
 
 ## Subroutines in pioasm
-
 [This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/subroutines) shows that subroutines in pioasm can be a thing and can - in some cases - be used to do more with the limited memory space than is possible with just writing the code in one program.
+
+## Read the SBUS protocol with pio code
+The SBUS protocol is typically used in Radio Controlled cars, drones, etc. If you want to read this protocol from a RC receiver in order to manipulate the data before setting motors and servos, you can use [this code](todo).

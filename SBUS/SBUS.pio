@@ -1,0 +1,62 @@
+.program sbus
+
+; A SBUS protocol implementation.
+; It is basically an uart Rx with inverted input, 100000 baud rate, a parity bit, and two stop bits (https://github.com/bolderflight/sbus)
+; the basis is the RPI pico example for pio rx (https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_rx/uart_rx.pio)
+
+; TODO:
+; - I haven't implemented parity checking. Even though there is enough time: the clock_div is about 150 and the [] waits can be scaled up at least a factor 3, doing parity checking seems difficult in pio code
+; - I haven't implemented error handling in the c-program (i.e. disabled 'irq 4 rel')
+
+;nop
+start:
+    wait 1 pin 0        ; Stall until start bit is asserted
+    set x, 7    [10]    ; Preload bit counter, then delay until halfway through
+                        ; the first data bit (12 cycles incl wait, set).
+bitloop:                
+    in pins, 1          ; Shift data bit into ISR
+    jmp x-- bitloop [6] ; Loop 8 times, each loop iteration is 8 cycles
+    nop [7]             ; TODO: read parity bit: skip this; do nothing for 8 cycles
+    jmp pin error       ; read stop bit (should be low)
+    jmp pin error       ; read second stop bit (should be low)
+    jmp good_stop       ; all is well
+error:
+;   irq 4 rel           ; TODO: Either a framing error or a break. Set a sticky flag,
+    wait 0 pin 0        ; and wait for line to return to idle state.
+    jmp start           ; Don't push data if we didn't see good framing.
+good_stop:              ; No delay before returning to start; a little slack is important in case the TX clock is slightly too fast.
+    mov x ISR           ; invert the data in the ISR
+    mov ISR ~x
+    push                ; push it to the Rx FIFO
+
+
+% c-sdk {
+static inline void sbus_program_init(PIO pio, uint sm, uint offset, uint pin, uint baud) {
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, false);
+    pio_gpio_init(pio, pin);
+    gpio_pull_up(pin);
+
+    pio_sm_config c = sbus_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, pin); // for WAIT, IN
+    sm_config_set_jmp_pin(&c, pin); // for JMP
+    // Shift to right, autopull disabled
+    sm_config_set_in_shift(&c, true, false, 32);
+    // Deeper FIFO as we're not doing any TX
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+    // SM transmits 1 bit per 8 execution cycles.
+    float div = (float)clock_get_hz(clk_sys) / (8 * baud);
+    sm_config_set_clkdiv(&c, div);
+    
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+static inline char sbus_program_getc(PIO pio, uint sm) {
+    // 8-bit read from the uppermost byte of the FIFO, as data is left-justified
+    io_rw_8 *rxfifo_shift = (io_rw_8*)&pio->rxf[sm] + 3;
+    while (pio_sm_is_rx_fifo_empty(pio, sm))
+        tight_loop_contents();
+    return (char)*rxfifo_shift;
+}
+
+%}
