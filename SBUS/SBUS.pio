@@ -16,7 +16,7 @@ bitloop:
     in pins, 1          ; Shift data bit into ISR
     jmp x-- bitloop [6] ; Loop 8 times, each loop iteration is 8 cycles
     nop [7]             ; TODO: read parity bit: skip this; do nothing for 8 cycles
-    jmp pin error       ; read stop bit (should be low)
+    jmp pin error [7]   ; read stop bit (should be low)
     jmp pin error       ; read second stop bit (should be low)
     jmp good_stop       ; all is well
 error:
