@@ -206,7 +206,7 @@ class state_machine:
                 self.vars["x"] -= 1
                 do_jump = True
         elif jmp_condition == 3:    # !y
-            if self.vars["y"] != 0:
+            if self.vars["y"] == 0:
                 do_jump = True
         elif jmp_condition == 4:    # y--
             if self.vars["y"] != 0:
