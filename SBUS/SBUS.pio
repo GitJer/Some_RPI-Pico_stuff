@@ -1,61 +1,57 @@
 .program sbus
 
-; A SBUS protocol implementation.
-; It is basically an uart Rx with inverted input, 100000 baud rate, a parity bit, and two stop bits (https://github.com/bolderflight/sbus)
-; the basis is the RPI pico example for pio rx (https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_rx/uart_rx.pio)
+; Start with the situation that the number of ones received is zero (an even number)
+; Read the 8 data bits and the parity bit (so, 9 bits in total)
+; The even parity bit has to make the total number of ones odd!
+; The code starts in the top half (the wrong parity part); if a one is observed it switches 
+; to the bottom half (the correct parity part). If again a one is observed, it switches back to the top half. 
+; Etc, switching back and forth every time a one is observed.
 
-; TODO:
-; - I haven't implemented parity checking. Even though there is enough time: the clock_div is about 150 and the [] waits can be scaled up at least a factor 3, doing parity checking seems difficult in pio code
-; - I haven't implemented error handling in the c-program (i.e. disabled 'irq 4 rel')
+; the bits arrive LSB first, thus right-shift it into the ISR
 
+.wrap_target
 start:
-    wait 1 pin 0        ; Stall until start bit is asserted
-    set x, 7    [10]    ; Preload bit counter, then delay until halfway through
-                        ; the first data bit (12 cycles incl wait, set).
-bitloop:                
-    in pins, 1          ; Shift data bit into ISR
-    jmp x-- bitloop [6] ; Loop 8 times, each loop iteration is 8 cycles
-    nop [7]             ; TODO: read parity bit: skip this; do nothing for 8 cycles
-    jmp pin error [7]   ; read stop bit (should be low)
-    jmp pin error       ; read second stop bit (should be low)
-    jmp good_stop       ; all is well
-error:
-;   irq 4 rel           ; TODO: Either a framing error or a break. Set a sticky flag,
-    wait 0 pin 0        ; and wait for line to return to idle state.
-    jmp start           ; Don't push data if we didn't see good framing.
-good_stop:              ; No delay before returning to start; a little slack is important in case the TX clock is slightly too fast.
-    mov x ISR           ; invert the data in the ISR
-    mov ISR ~x
-    push                ; push it to the Rx FIFO
+    wait 1 pin 0            ; Stall until start bit is asserted
+    set x, 8 [10]           ; read 8 data bits plus the parity bit. The parity bit should make a odd total of ones.
+                            ; delay 12 cycles incl wait, set (8 cycles for the start bit, then 4 to get halfway the first data bit)
+even_ones:
+    in pins, 1              ; Shift data bit into ISR
+    mov OSR ISR             ; test if it is a one or zero: copy it to the OSR and left-shift one bit out
+    out y 1
+    jmp !y even_ones_1      ; jump if y == 0, the number of ones doesn't change
+    jmp odd_ones_2          ; the number of ones did change! Go to the bottom part (correct parity)
+even_ones_1:
+    jmp x-- even_ones [3]   ; Loop 9 times (8 data bits + the parity bit), each loop iteration is 8 cycles
+    ; no need to wait for the stop bits, just stop already, the parity is wrong
+    jmp end_and_restart
+even_ones_2:                ; the only reason this is here is the [2] compared to [3] a couple of lines back
+                            ; because after the "jmp !y" an extra jmp is made, which costs 1 cycle
+    jmp x-- even_ones [2]   ; Loop 9 times (8 data bits + the parity bit), each loop iteration is 8 cycles
+    ; no need to wait for the stop bits, just stop already, the parity is wrong
+    jmp end_and_restart
+;---------------------------------------------------------
+; If the reading of 9 bits ends above: the parity is wrong
+;
+; If the reading of 9 bits ends below: the parity is correct
+;---------------------------------------------------------
+odd_ones:
+    in pins, 1              ; Shift data bit into ISR
+    mov OSR ISR             ; copy it to the OSR to get that bit into the y register
+    out y 1                 ; 
+    jmp !y odd_ones_1       ; jump if y == 0, the number of ones doesn't change
+    jmp even_ones_2         ; the number of ones did change! Go to the top part (wrong parity)
+odd_ones_1:
+    jmp x-- odd_ones [3]    ; Loop 9 times (8 data bits + the parity bit), each loop iteration is 8 cycles
+    ; all data has been read, no need to wait for the stop bits. The parity is correct
+correct:
+    mov OSR ISR             ; the parity bit is still in ISR, remove it: copy to OSR, left-shift the parity bit out
+    out NULL 1
+    mov ISR ~OSR            ; invert the data in the OSR and copy it to the ISR
+    push                    ; push the ISR to the Rx FIFO
+end_and_restart:
+    wait 0 pin 0            ; wait for line to return to idle state.
+    jmp start               ; Don't push data if we didn't see correct framing.
+odd_ones_2:
+    jmp x-- odd_ones [2]    ; Loop 9 times (8 data bits + the parity bit), each loop iteration is 8 cycles
+    jmp correct             ; all data has been read, no need to wait for the stop bits. The parity is correct
 
-
-% c-sdk {
-static inline void sbus_program_init(PIO pio, uint sm, uint offset, uint pin, uint baud) {
-    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, false);
-    pio_gpio_init(pio, pin);
-    gpio_pull_up(pin);
-
-    pio_sm_config c = sbus_program_get_default_config(offset);
-    sm_config_set_in_pins(&c, pin); // for WAIT, IN
-    sm_config_set_jmp_pin(&c, pin); // for JMP
-    // Shift to right, autopull disabled
-    sm_config_set_in_shift(&c, true, false, 32);
-    // Deeper FIFO as we're not doing any TX
-    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
-    // SM transmits 1 bit per 8 execution cycles.
-    float div = (float)clock_get_hz(clk_sys) / (8 * baud);
-    sm_config_set_clkdiv(&c, div);
-    
-    pio_sm_init(pio, sm, offset, &c);
-    pio_sm_set_enabled(pio, sm, true);
-}
-
-static inline char sbus_program_getc(PIO pio, uint sm) {
-    // 8-bit read from the uppermost byte of the FIFO, as data is left-justified
-    io_rw_8 *rxfifo_shift = (io_rw_8*)&pio->rxf[sm] + 3;
-    while (pio_sm_is_rx_fifo_empty(pio, sm))
-        tight_loop_contents();
-    return (char)*rxfifo_shift;
-}
-
-%}

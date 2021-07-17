@@ -30,10 +30,12 @@ class state_machine:
         self.vars["delay"] = 0
 
         self.settings = {}
+        # TODO: make these settable from c_program
         self.settings["in_shift_right"] = True  # right
         self.settings["in_shift_autopush"] = False
         self.settings["push_threshold"] = 32  # false
-        self.settings["out_shift_right"] = True  # right
+        self.settings["out_shift_right"] = False  # left
+        #self.settings["out_shift_right"] = True  # right
         self.settings["out_shift_autopull"] = False
         self.settings["pull_threshold"] = 32  # false
         # TODO: is this a variable? setting status is not implemented yet
