@@ -1,5 +1,10 @@
 # PWM input using the Raspberry Pi Pico PIO 
 
+# UPDATE:
+There was a problem with getting the PwmIn to read more than one pin. So, I've made an update. This update can read pwm signals from up to 4 pins (you could probably go up to 8 if pio1 is also used). It uses (relative) irq in the pio code to signal the c-code that new data is available. See the directory PwmIn_4pins.
+
+# ORIGINAL:
+
 Most microcontrollers have hardware to produce Pulse Width Modulation (PWM) signals. But sometimes it is useful to be able to read PWM signals and determine the period, pulse width and duty cycle.
 
 Although the RP2040 seems to be capable of measuring pulse width and period, this takes more CPU cycles than letting a PIO state machine take care of it.

@@ -1,0 +1,42 @@
+
+.program PwmIn
+
+; algorithm:
+
+; loop:
+;    reset y, the 'timer' for the pulsewidth (high period)
+;    reset x, the 'timer' for the low period. (high + low = period)
+;    wait for a 0, then wait for a 1: this is the rising edge
+;    loop: 
+;       decrement y timer
+;       test for falling edge 
+;    y timer value is the pulse width (actually, (0xFFFFFFFF - x)*2/125MHz is the pulse width)
+;    loop:
+;       test for rising edge
+;       decrement x timer
+;    x timer is the low period (actually, (0xFFFFFFFF - x)*2/125MHz is the low period)
+;    push both y and x to the Rx FIFO
+;    notify via relative IRQ
+
+.wrap_target
+start:
+    mov y ~NULL         ; start with the value 0xFFFFFFFF
+    mov x ~NULL         ; start with the value 0xFFFFFFFF
+    wait 0 pin 0        ; wait for a 0
+    wait 1 pin 0        ; wait for a 1, now we really have the rising edge
+timer_hp:               ; loop for high period
+    jmp y-- test        ; count down for pulse width
+    jmp start           ; timer has reached 0, stop count down of pulse, restart
+test:
+    jmp pin timer_hp    ; test if the pin is still 1, if so, continue counting down
+timer_lp:               ; loop for low period
+    jmp pin timerstop   ; if the pin has become 1, the period is over, stop count down
+    jmp x-- timer_lp    ; if not: count down
+    jmp start           ; timer has reached 0, stop count down of low period, restart
+timerstop:
+    mov ISR ~y          ; move the value ~y to the ISR: the high period (pulsewidth) (0xFFFFFFFF-x)
+    push noblock        ; push the ISR into the Rx FIFO
+    mov ISR ~x          ; move the value ~x to the ISR: the low period (0xFFFFFFFF-x)
+    push noblock        ; push the ISR into the Rx FIFO
+    irq 0 rel           ; notify the c-program via IRQ
+.wrap
