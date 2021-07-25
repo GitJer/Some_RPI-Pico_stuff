@@ -10,4 +10,4 @@ It even does parity checking in the pio code!
 
 ## Update
 
-Since the SBUS protocol is "normal" uart I originally started looking at using the hardware uart, but couldn't find an invert option. Turns out you have to invert the GPIO used for input or output. The updated code that doesn't use pio but uart hardware is [here]().
+Since the SBUS protocol is "normal" uart I originally started looking at using the hardware uart, but couldn't find an invert option. Turns out you have to invert the GPIO used for input or output. The updated code that doesn't use pio but uart hardware is [here](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/SBUS/gpio_invert).
