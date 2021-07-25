@@ -67,5 +67,5 @@ E.g. the LMT01 temperature sensor uses this, [see](https://www.reddit.com/r/rasp
 ## Subroutines in pioasm
 [This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/subroutines) shows that subroutines in pioasm can be a thing and can - in some cases - be used to do more with the limited memory space than is possible with just writing the code in one program.
 
-## Read the SBUS protocol with pio code
+## Read the SBUS protocol with (and without!) pio code
 The SBUS protocol is typically used in Radio Controlled cars, drones, etc. If you want to read this protocol from a RC receiver in order to manipulate the data before setting motors and servos, you can use [this code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/SBUS).
