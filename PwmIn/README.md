@@ -7,7 +7,7 @@ There was a problem with getting the PwmIn to read more than one pin. So, I've m
 
 Most microcontrollers have hardware to produce Pulse Width Modulation (PWM) signals. But sometimes it is useful to be able to read PWM signals and determine the period, pulse width and duty cycle.
 
-Although the RP2040 seems to be capable of measuring pulse width and period, this takes more CPU cycles than letting a PIO state machine take care of it.
+(Warning: questionable statement) Although the RP2040 seems to be capable of measuring pulse width and period, this takes more CPU cycles than letting a PIO state machine take care of it.
 
 Based on the method to measure pulses with PIO code as described [here](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/HCSR04), a PWM Input can be made.
 
