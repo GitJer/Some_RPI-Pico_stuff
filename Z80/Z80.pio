@@ -1,19 +1,35 @@
+; This pio programm allows a Z80 bus to:
+; - read from the RPI pico by providing an address (read_data)
+; - write a value to the RPI pico to a memory address (write_data)
+
+
+    ; set the pin assignment:
+    ; The starting point of the 8 bit Data D0 - D7
+.define PUBLIC D0 2
+    ; The starting point of the 16 bit Address A0 - A15
+.define PUBLIC A0 (D0 + 8)
+    ; Read bus flag
+.define PUBLIC RD (A0 + 8 + 0)
+    ; Write bus flag
+.define PUBLIC WR (A0 + 8 + 1)
+    ; Direction of level shifter
+.define PUBLIC DIR (A0 + 8 + 2)
+    ; Output enable of level shifter
+.define PUBLIC OE (A0 + 8 + 3)
 
 
 .program Z80
 
 public set_default:
     ; set pins:  MSB = OE, LSB = DIR, so 0b10 is OE=1 and DIR=0
-    ; set the default values (OE=1 and DIR=0)
+    ; set the default: OE=1 and DIR=0
     set pins 0b10
     ; do nothing (just keep setting the default values)
     jmp set_default
 
 public read_data:
-    ; use RD pin as wait pin, this is pin number 18
-
     ; wait for RD to become 0
-    wait 0 GPIO 18 
+    wait 0 GPIO RD 
     ; read the data (8 bits) and addres (8 bits)
     in pins 16
     ; push the data and address to the RxFIFO
@@ -25,22 +41,20 @@ public read_data:
     ; set OE=0 and DIR=0
     set pins 0b00
     ; wait for RD to become 1, then wait 3 cycles
-    wait 1 GPIO 18 [3]
-    ; go back to the top
+    wait 1 GPIO RD [3]
+    ; go back to the default state
     jmp set_default
 
 public write_data:
-    ; use WR pin as wait pin, this is pin number 19
-
     ; wait for WR to become 0
-    wait 0 GPIO 19
-    ; set the values (OE=0 and DIR=0)
+    wait 0 GPIO WR
+    ; set OE=0 and DIR=0
     set pins 0b00
     ; read the data (8 bits) and addres (8 bits)
     in pins 16
     ; push the data and address to the RxFIFO
     push
     ; wait for WR to become 1, then wait 3 cycles
-    wait 1 GPIO 19 [3]
-    ; go back to the top
+    wait 1 GPIO WR [3]
+    ; go back to the default state
     jmp set_default

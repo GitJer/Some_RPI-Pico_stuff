@@ -1,27 +1,16 @@
 #include "stdio.h"
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
-#include "hardware/dma.h"
-#include "hardware/irq.h"
+// the .pio.h file also defines (in this order): D0 (8 bits), A0 (8 bits), RW, WR, DIR, OE
 #include "Z80.pio.h"
 
 // PIO and state machine
 PIO pio;
 uint sm;
+// the offset of the pio program in pio memory
 uint offset;
 
-// TODO: move these definitions to the pio program (as globally visible). But can those defines do math?
-
-// The starting point of the 8 bit Data D0 - D8
-// NOTE: I started at 2 because the first two pins are used by picoprobe.
-#define D0 2
-// The starting point of the 16 bit Address A0 - A15
-#define A0 (D0 + 8)
-#define RD (A0 + 8 + 0)
-#define WR (A0 + 8 + 1)
-#define DIR (A0 + 8 + 2)
-#define OE (A0 + 8 + 3)
-
+// Configure the pio state machine
 void configure_pio_sm()
 {
     // pio 0 is used
@@ -29,37 +18,39 @@ void configure_pio_sm()
     // state machine 0 is used.
     sm = 0;
 
+    // function select: this allows pio to set output on a gpio
     for (int i = D0; i <= OE; i++)
-    {
         pio_gpio_init(pio, i);
-    }
+
     // TODO: for testing purposes, set data and address lines to 0 via pull down, normally this would be set externally
     for (int i = D0; i < RD; i++)
-    {
         gpio_set_pulls(i, false, true);
-    }
 
     // load the sm program into the pio memory
     offset = pio_add_program(pio, &Z80_program);
     // make a sm config
     pio_sm_config smc = Z80_program_get_default_config(offset);
-    // set initial pindirs
+
+    // set initial pindirs: D0 - D7 are (also) output
     pio_sm_set_consecutive_pindirs(pio, sm, D0, 8, true);
-    pio_sm_set_consecutive_pindirs(pio, sm, A0, 8, true);
+    // set initial pindirs: A0 - A7 are input
+    pio_sm_set_consecutive_pindirs(pio, sm, A0, 8, false);
+    // set initial pindirs: RD, WR are input
     pio_sm_set_consecutive_pindirs(pio, sm, RD, 1, false);
     pio_sm_set_consecutive_pindirs(pio, sm, WR, 1, false);
+    // set initial pindirs: DIR and OE are output
     pio_sm_set_consecutive_pindirs(pio, sm, DIR, 1, true);
     pio_sm_set_consecutive_pindirs(pio, sm, OE, 1, true);
 
-    // inputs start at the first data bit (D0)
+    // pio 'in' pins: inputs start at the first data bit (D0)
     sm_config_set_in_pins(&smc, D0);
-    // data can also be output
+    // pio 'out' pins: data D0-D7 can also be output
     sm_config_set_out_pins(&smc, D0, 8);
-    // use set pins for DIR (LSB) and OE (MSB)
+    // pio 'set' pins: DIR (LSB) and OE (MSB)
     sm_config_set_set_pins(&smc, DIR, 2);
-    // Shift to left, autopull disabled
+    // Reading from RxFIFO: Shift to left, autopull disabled
     sm_config_set_in_shift(&smc, false, false, 32);
-    // Shift to left, autopull disabled
+    // Writing to TxFIFO: Shift to right, autopull disabled
     sm_config_set_out_shift(&smc, true, false, 32);
     // set clock to about 4Mhz TODO: set correct frequency
     // sm_config_set_clkdiv(&smc, 31);
@@ -75,8 +66,10 @@ int main()
     // needed for printf
     stdio_init_all();
 
+    // initialize the state machine
     configure_pio_sm();
 
+    // print the important gpio assignments
     printf("D0=%d\n", D0);
     printf("A0=%d\n", A0);
     printf("RD=%d\n", RD);
@@ -92,6 +85,8 @@ int main()
     uint8_t data;
     // the address part
     uint16_t address;
+    // used for checking whether the sm has returned to the default state
+    uint8_t current_pc;
 
     // start in the default situation
     // Note: if this is in reality set by an external system (e.g. via pullup/down resistors, ths can be removed)
@@ -123,12 +118,13 @@ int main()
         printf("setting data to %d\n", counter);
         // send the data to the pio for writing it to the data bits
         pio_sm_put(pio, sm, counter);
-        // NOTE: whatever is set on the data bus is maintained by the RPI pico,
+        // NOTE: whatever is set on the data pins (D0-D7) is maintained by the RPI pico,
         //       so the next read will return whatever was set!
 
-        // TODO: can this sleep be removed?
-        // wait some time for the pio to finish the read
-        sleep_ms(1);
+        // wait for the pio program to return to the default state
+        current_pc = pio_sm_get_pc(pio, sm) - (offset + Z80_offset_set_default);
+        while (current_pc > 1)
+            current_pc = pio_sm_get_pc(pio, sm) - (offset + Z80_offset_set_default);
 
         // *********************************************
         // write:
@@ -146,8 +142,9 @@ int main()
         address = addr_data >> 8;
         printf("write_data: raw=%zu address=%d data=%d\n", addr_data, address, data);
 
-        // TODO: can this sleep be removed?
-        // wait some time for the pio to finish the write
-        sleep_ms(1);
+        // wait for the pio program to return to the default state
+        current_pc = pio_sm_get_pc(pio, sm) - (offset + Z80_offset_set_default);
+        while (current_pc > 1)
+            current_pc = pio_sm_get_pc(pio, sm) - (offset + Z80_offset_set_default);
     }
 }

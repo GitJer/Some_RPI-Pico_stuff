@@ -8,6 +8,13 @@
 #include "hardware/pio.h"
 #endif
 
+#define D0 2
+#define A0 10
+#define RD 18
+#define WR 19
+#define DIR 20
+#define OE 21
+
 // --- //
 // Z80 //
 // --- //
