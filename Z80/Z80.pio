@@ -1,0 +1,46 @@
+
+
+.program Z80
+
+public set_default:
+    ; set pins:  MSB = OE, LSB = DIR, so 0b10 is OE=1 and DIR=0
+    ; set the default values (OE=1 and DIR=0)
+    set pins 0b10
+    ; do nothing (just keep setting the default values)
+    jmp set_default
+
+public read_data:
+    ; use RD pin as wait pin, this is pin number 18
+
+    ; wait for RD to become 0
+    wait 0 GPIO 18 
+    ; read the data (8 bits) and addres (8 bits)
+    in pins 16
+    ; push the data and address to the RxFIFO
+    push
+    ; get the new data to set as output
+    pull block
+    ; set the data bits on the bus 
+    out pins 8
+    ; set OE=0 and DIR=0
+    set pins 0b00
+    ; wait for RD to become 1, then wait 3 cycles
+    wait 1 GPIO 18 [3]
+    ; go back to the top
+    jmp set_default
+
+public write_data:
+    ; use WR pin as wait pin, this is pin number 19
+
+    ; wait for WR to become 0
+    wait 0 GPIO 19
+    ; set the values (OE=0 and DIR=0)
+    set pins 0b00
+    ; read the data (8 bits) and addres (8 bits)
+    in pins 16
+    ; push the data and address to the RxFIFO
+    push
+    ; wait for WR to become 1, then wait 3 cycles
+    wait 1 GPIO 19 [3]
+    ; go back to the top
+    jmp set_default
