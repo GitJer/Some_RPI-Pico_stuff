@@ -15,48 +15,72 @@
 #define DIR 20
 #define OE 21
 
-// --- //
-// Z80 //
-// --- //
+// -------- //
+// Z80_read //
+// -------- //
 
-#define Z80_wrap_target 0
-#define Z80_wrap 15
+#define Z80_read_wrap_target 0
+#define Z80_read_wrap 9
 
-#define Z80_offset_set_default 0u
-#define Z80_offset_read_data 2u
-#define Z80_offset_write_data 10u
-
-static const uint16_t Z80_program_instructions[] = {
+static const uint16_t Z80_read_program_instructions[] = {
             //     .wrap_target
     0xe002, //  0: set    pins, 2                    
-    0x0000, //  1: jmp    0                          
-    0x2012, //  2: wait   0 gpio, 18                 
-    0x4010, //  3: in     pins, 16                   
-    0x8020, //  4: push   block                      
+    0x00c1, //  1: jmp    pin, 1                     
+    0x4010, //  2: in     pins, 16                   
+    0x8020, //  3: push   block                      
+    0xc000, //  4: irq    nowait 0                   
     0x80a0, //  5: pull   block                      
     0x6008, //  6: out    pins, 8                    
     0xe000, //  7: set    pins, 0                    
-    0x2392, //  8: wait   1 gpio, 18             [3] 
-    0x0000, //  9: jmp    0                          
-    0x2013, // 10: wait   0 gpio, 19                 
-    0xe000, // 11: set    pins, 0                    
-    0x4010, // 12: in     pins, 16                   
-    0x8020, // 13: push   block                      
-    0x2393, // 14: wait   1 gpio, 19             [3] 
-    0x0000, // 15: jmp    0                          
+    0x03c0, //  8: jmp    pin, 0                 [3] 
+    0x0008, //  9: jmp    8                          
             //     .wrap
 };
 
 #if !PICO_NO_HARDWARE
-static const struct pio_program Z80_program = {
-    .instructions = Z80_program_instructions,
-    .length = 16,
+static const struct pio_program Z80_read_program = {
+    .instructions = Z80_read_program_instructions,
+    .length = 10,
     .origin = -1,
 };
 
-static inline pio_sm_config Z80_program_get_default_config(uint offset) {
+static inline pio_sm_config Z80_read_program_get_default_config(uint offset) {
     pio_sm_config c = pio_get_default_sm_config();
-    sm_config_set_wrap(&c, offset + Z80_wrap_target, offset + Z80_wrap);
+    sm_config_set_wrap(&c, offset + Z80_read_wrap_target, offset + Z80_read_wrap);
+    return c;
+}
+#endif
+
+// --------- //
+// Z80_write //
+// --------- //
+
+#define Z80_write_wrap_target 0
+#define Z80_write_wrap 7
+
+static const uint16_t Z80_write_program_instructions[] = {
+            //     .wrap_target
+    0xe002, //  0: set    pins, 2                    
+    0x00c1, //  1: jmp    pin, 1                     
+    0xe000, //  2: set    pins, 0                    
+    0x4010, //  3: in     pins, 16                   
+    0x8020, //  4: push   block                      
+    0xc001, //  5: irq    nowait 1                   
+    0x03c0, //  6: jmp    pin, 0                 [3] 
+    0x0006, //  7: jmp    6                          
+            //     .wrap
+};
+
+#if !PICO_NO_HARDWARE
+static const struct pio_program Z80_write_program = {
+    .instructions = Z80_write_program_instructions,
+    .length = 8,
+    .origin = -1,
+};
+
+static inline pio_sm_config Z80_write_program_get_default_config(uint offset) {
+    pio_sm_config c = pio_get_default_sm_config();
+    sm_config_set_wrap(&c, offset + Z80_write_wrap_target, offset + Z80_write_wrap);
     return c;
 }
 #endif

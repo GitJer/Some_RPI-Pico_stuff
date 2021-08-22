@@ -7,13 +7,7 @@ target_sources(Z80 PRIVATE Z80.c)
 target_link_libraries(Z80 PRIVATE
         pico_stdlib
         hardware_pio
-        hardware_dma
         hardware_irq
         )
-
-# pico_add_extra_outputs(Z80)
-
-# add url via pico_set_program_url
-# example_auto_set_url(Z80)
 
 

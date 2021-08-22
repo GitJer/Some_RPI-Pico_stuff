@@ -18,43 +18,60 @@
 .define PUBLIC OE (A0 + 8 + 3)
 
 
-.program Z80
+.program Z80_read
 
-public set_default:
+set_rd_default:
     ; set pins:  MSB = OE, LSB = DIR, so 0b10 is OE=1 and DIR=0
     ; set the default: OE=1 and DIR=0
     set pins 0b10
-    ; do nothing (just keep setting the default values)
-    jmp set_default
 
-public read_data:
-    ; wait for RD to become 0
-    wait 0 GPIO RD 
-    ; read the data (8 bits) and addres (8 bits)
+jmp1_rd_label:
+    ; wait for RD to become 0 (keep jmp-ing until RD=0)
+    jmp PIN jmp1_rd_label
+    ; RD=0: read the data (8 bits) and addres (8 bits)
     in pins 16
     ; push the data and address to the RxFIFO
     push
+    ; data has been read and pushed: issue an irq
+    irq 0    
     ; get the new data to set as output
     pull block
     ; set the data bits on the bus 
     out pins 8
     ; set OE=0 and DIR=0
     set pins 0b00
+    ; wait until the c program clears the irq
+    ; wait 0 IRQ 0
+jmp2_rd_label:
     ; wait for RD to become 1, then wait 3 cycles
-    wait 1 GPIO RD [3]
-    ; go back to the default state
-    jmp set_default
+    ; go back to the default state if RD=1
+    jmp PIN set_rd_default [3]
+    ; RD is still 0, test again
+    jmp jmp2_rd_label
 
-public write_data:
-    ; wait for WR to become 0
-    wait 0 GPIO WR
-    ; set OE=0 and DIR=0
+
+.program Z80_write
+
+set_wr_default:
+    ; set pins:  MSB = OE, LSB = DIR, so 0b10 is OE=1 and DIR=0
+    ; set the default: OE=1 and DIR=0
+    set pins 0b10
+
+jmp1_wr_label:
+    ; wait for WR to become 0 (keep jmp-ing until WR=0)
+    jmp PIN jmp1_wr_label
+    ; WR=0: set OE=0 and DIR=0
     set pins 0b00
     ; read the data (8 bits) and addres (8 bits)
     in pins 16
     ; push the data and address to the RxFIFO
     push
+    ; data has been read and pushed: issue an irq and wait for it to be cleared
+    ; irq wait 1
+    irq 1
+jmp2_wr_label:
     ; wait for WR to become 1, then wait 3 cycles
-    wait 1 GPIO WR [3]
-    ; go back to the default state
-    jmp set_default
+    ; go back to the default state if WR=1
+    jmp PIN set_wr_default [3]
+    ; WR is still 0, test again
+    jmp jmp2_wr_label
