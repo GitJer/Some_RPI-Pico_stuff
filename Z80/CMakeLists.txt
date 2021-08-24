@@ -8,6 +8,7 @@ target_link_libraries(Z80 PRIVATE
         pico_stdlib
         hardware_pio
         hardware_irq
+        hardware_vreg
         )
 
 
