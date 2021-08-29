@@ -13,7 +13,7 @@ stillone:
     jmp x-- checkzero; the decrease the time to wait, or decide it has definitively become 1
 isone:
     wait 0 pin 0    ; the pin is 1, wait for it to become 0
-    set x 31        ; prepare to test the pin for 31 8 2 clock cycles
+    set x 31        ; prepare to test the pin for 31 * 2 clock cycles
 checkone:
     jmp pin isone   ; if the pin has returned to 1, start over
     jmp x-- checkone; decrease the time to wait
