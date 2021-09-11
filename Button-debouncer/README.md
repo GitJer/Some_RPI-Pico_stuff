@@ -64,7 +64,7 @@ The blue line is the raw input signal. It bounces up and down a couple of times 
 
 If the debouncing time is chosen too small the yellow line simply follows the blue line including the bounces, but with a slight delay.
 
-## Debouncing time
+## Debouncing time (Edit: can be set in the updated version)
 In the figure above the time between the bounces were very short, between 1 and 4 microseconds. For a mechanical button the debounce time should probably be much higher. In the Arduino example mentioned above 50 milliseconds is used. So, how can the debounce time be set?
 In the PIO code the loop that waits for a possible bounce-back is 31 iterations. In each iteration two jmp statements are executed, taking 2 clock cycles. Thus, a total of 62 clock cycles is waited to see if the signal stabilizes. The length of a clock cycle is determined by the system clock speed and the clock devisor for the state machine. In the user code a clock divisor of 11 is set (`sm_config_set_clkdiv(&c, 11);`), but that was just to show that it works for the test shown in the figure above.
 
@@ -79,16 +79,3 @@ The other way around, the needed divisor for a desired debouncing time is:
 divisor = system clock * debounce time / 62
 
 For a debounce time of 50ms a divisor of more than 100000 is required (I haven't tested if this is actually possible, but the `sm_config_set_clkdiv` function internally uses a 16-bit integer, although its parameter is a float.)
-
-## Improvements
-Since this is the first time I tried to do something with the Pico and the PIO, there are bound to be a lot things that can be improved upon.
-
-**Consider this to be a proof of concept, not fully functional code!**
-
-Some improvements that could be made are:
-* The user should be able to set the required debounce time, e.g. in milliseconds
-* Currently only the pio0 instance can be used. So, 4 inputs can be debounced. If pio1 is also used, 8 pins can be debounced.
-* I am sure someone will be able to write PIO debounce code using just 2 or 3 instructions ...
-
-
-
