@@ -68,15 +68,6 @@ int Debounce::debounce_gpio(uint gpio)
         return -1;
     }
 
-    // TODO: for testing!
-    if (gpio > 10)
-    {
-#ifdef PRINT_ERRORS
-        printf("debounce error gpio should be <=10 for testing\n");
-#endif
-        return -1;
-    }
-
     // Find a pio and sm:
     // start with trying to use pio0
     PIO pio = pio0;
@@ -278,7 +269,6 @@ int Debounce::undebounce_gpio(uint gpio)
     // unclaim the sm
     pio_sm_unclaim(pio_used, sm_used);
 
-    // TODO:
     // if this is the last gpio of a pio: remove the program, set pioX_already_set to UNUSED
     int i;
     for (i = 0; i < 32; i++)
