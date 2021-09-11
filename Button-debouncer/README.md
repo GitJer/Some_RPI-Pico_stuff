@@ -39,7 +39,7 @@ The c++ code contains a class that starts the PIO code and lets the user code re
 * The code after 'isone' works as follows:
   * Since the pin is 1 wait for a change to 0
   * If that happens, set 31 into the x scratch register
-    * This is the amount of 'time' the debouncer will wait before switching over. The actual amount of time is also dependent on the clock divisor, and the fact that two jmp statements are executed for a test. See the 'Debouncing time' section below
+    * This is the amount of 'time' the debouncer will wait before switching over. The actual amount of time is also dependent on the clock divisor, and the fact that two jmp statements are executed for a test. Edit: in the updated version the debounce time can be set in ms.
   * The program keeps checking if the input changes back to 1; and if so, start over at 'isone'
   * If the input does not change back, complete the loop of counting down from 31
   * If the x scratch register becomes 0, the signal has definitively switched to 0; start from 'iszero'
@@ -63,19 +63,3 @@ Yes, it does. To show that the debouncer works, I have used another microcontrol
 The blue line is the raw input signal. It bounces up and down a couple of times between point (a) and (b). The yellow line is the debounced pin state. It clearly follows the blue line, but skips over the bounces.
 
 If the debouncing time is chosen too small the yellow line simply follows the blue line including the bounces, but with a slight delay.
-
-## Debouncing time (Edit: can be set in the updated version)
-In the figure above the time between the bounces were very short, between 1 and 4 microseconds. For a mechanical button the debounce time should probably be much higher. In the Arduino example mentioned above 50 milliseconds is used. So, how can the debounce time be set?
-In the PIO code the loop that waits for a possible bounce-back is 31 iterations. In each iteration two jmp statements are executed, taking 2 clock cycles. Thus, a total of 62 clock cycles is waited to see if the signal stabilizes. The length of a clock cycle is determined by the system clock speed and the clock devisor for the state machine. In the user code a clock divisor of 11 is set (`sm_config_set_clkdiv(&c, 11);`), but that was just to show that it works for the test shown in the figure above.
-
-The system clock runs at 125MHz but can be scaled down using the clock divisor: a divisor of n means that 1 instruction will be executed per n system clock cycles. The formula for the debounce time becomes:
-
-debounce time = 62 * divisor / system clock
-
-For a divisor of 11, the debounce time becomes a bit more than 5 microseconds, which seems about right when looking at the figure above.
-
-The other way around, the needed divisor for a desired debouncing time is:
-
-divisor = system clock * debounce time / 62
-
-For a debounce time of 50ms a divisor of more than 100000 is required (I haven't tested if this is actually possible, but the `sm_config_set_clkdiv` function internally uses a 16-bit integer, although its parameter is a float.)
