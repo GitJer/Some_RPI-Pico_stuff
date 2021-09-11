@@ -1,5 +1,14 @@
 # Button debouncer using the Raspberry Pico PIO 
 
+## Update 
+
+The new version allows the use of all 8 PIO state machines, and thus debounce up to 8 gpio.
+
+It also allows setting of the debounce time between 0.5 to 30 ms.
+
+
+## Original text
+
 When using a GPIO to read noisy input, such as a mechanical button, it may happen that the signal read by the microcontroller rapidly switches back and forth, which may lead to false detection of several button presses where only one was intended. To prevent this, some hardware solutions exist as well as software solutions. This project is a software debouncer that makes sure that only after the input signal has stabilized, the code will read the new value. The downside of debouncers is that they usually cost some processing time to function. For Arduino a simple debouncer can be found [here](https://www.arduino.cc/en/Tutorial/BuiltInExamples/Debounce).
 
 The nice thing about the [Raspberry Pico](https://www.raspberrypi.org/documentation/pico/getting-started) is that it has 8 programmable IO (PIO) blocks that work independent of the main cores. I wanted to try my hand at programming the PIO and decided to do something I hadn't already seen as an example: a debouncer. The debouncer runs on one of the state machines of a PIO instance (there are two PIO instances and each has 4 state machines.)

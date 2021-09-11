@@ -1,27 +1,8 @@
-; The output (pins) is the debounced input (pin)
-
-.program button_debounce
-
-    jmp pin isone   ; executed only once: is the pin currently 0 or 1?
-iszero:
-    wait 1 pin 0    ; the pin is 0, wait for it to become 1
-    set x 31        ; prepare to test the pin for 31 * 2 clock cycles
-checkzero:
-    jmp pin stillone; check if the pin is still 1
-    jmp iszero      ; if the pin has returned to 0, start over
-stillone:
-    jmp x-- checkzero; the decrease the time to wait, or decide it has definitively become 1
-isone:
-    wait 0 pin 0    ; the pin is 1, wait for it to become 0
-    set x 31        ; prepare to test the pin for 31 * 2 clock cycles
-checkone:
-    jmp pin isone   ; if the pin has returned to 1, start over
-    jmp x-- checkone; decrease the time to wait
-    jmp iszero      ; the pin has definitively become 0
+; Debounce a gpio
 
 
 ; Explanation:
-; - start with the assumption that the pin is in a steady state. 
+; - start with the assumption that the gpio is in a steady state. 
 ;   If it is currently 1, then go to 'isone'; if it is currently 0, then go to 'iszero'
 ; - the branch of 'isone' works as follows:
 ;     wait for a change to 0
@@ -32,5 +13,34 @@ checkone:
 ;     if the input does not change back, complete the loop of counting down from 31
 ;     if the x scratch register becomes 0, the signal has definitively switched to 0:
 ;         start from 'iszero'
-; - the branch of 'iszero' works similarly, but the jmp pin statement jumps on 1, not 0
+; - the branch of 'iszero' works similarly, but note that a jmp pin statement always jumps on 1, not 0
 ; - if (offset+1 <= pc < offset+isone) the value is 0, if (pc >= offset+isone) the value is 1
+; - The border between 0 and 1 in the code is taken as 'isone' which is made public as 'button_debounce_border'
+
+.program button_debounce
+
+    jmp pin isone   ; executed only once: is the gpio currently 0 or 1?
+iszero:
+    wait 1 pin 0    ; the gpio is 0, wait for it to become 1
+    set x 31        ; prepare to test the gpio for 31 * 2 clock cycles
+checkzero:
+    ; nop [31]      ; possible location to add some pauses if longer debounce times are needed
+                    ; Note: also insert a pause right after 'checkone' below
+
+    jmp pin stillone; check if the gpio is still 1
+    jmp iszero      ; if the gpio has returned to 0, start over
+stillone:
+    jmp x-- checkzero; the decrease the time to wait, or decide it has definitively become 1
+isone:
+    wait 0 pin 0    ; the gpio is 1, wait for it to become 0
+    set x 31        ; prepare to test the gpio for 31 * 2 clock cycles
+checkone:
+    ; nop [31]      ; possible location to add some pauses if longer debounce times are needed
+                    ; Note: also insert a pause right after 'checkzero' above
+
+    jmp pin isone   ; if the gpio has returned to 1, start over
+    jmp x-- checkone; decrease the time to wait
+    jmp iszero      ; the gpio has definitively become 0
+
+; the c-code must know where the border between 0 and 1 is in the code:
+.define public border isone
