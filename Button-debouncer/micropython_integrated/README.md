@@ -30,7 +30,7 @@ cd /YOUR_PATH/micropython/examples/usercmodule
 mkdir button_debounce
 cd button_debounce
 ```
-**The next text isn't needed if you use the files in this github repository! Skip to Compiling**
+**The next text isn't needed if you use the files in this github repository! Skip to 'Add to overall cmake file for user-c-modules'**
 
 Copy the cpp files to this directory. Do not forget to include the generated .pio.h file if needed:
 ```
@@ -136,6 +136,7 @@ target_include_directories(usermod_debounce INTERFACE
 )
 target_link_libraries(usermod INTERFACE usermod_debounce)
 ```
+## Add to overall cmake file for user-c-modules
 In the directory with usercmodules add the button_debounce to the micropython.cmake file (you can use any editor, I used vi):
 ```
 vi /YOUR_PATH/micropython/examples/usercmodule/micropython.cmake
