@@ -30,7 +30,7 @@ cd /YOUR_PATH/micropython/examples/usercmodule
 mkdir button_debounce
 cd button_debounce
 ```
-**asterisks** The next text isn't needed if you use the files in this github repository! Skip to Compiling
+**The next text isn't needed if you use the files in this github repository! Skip to Compiling**
 
 Copy the cpp files to this directory. Do not forget to include the generated .pio.h file if needed:
 ```
