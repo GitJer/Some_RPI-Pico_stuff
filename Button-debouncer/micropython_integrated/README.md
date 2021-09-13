@@ -16,7 +16,7 @@ Go to the rp2 port in the micropython directory:
 cd /YOUR_PATH/micropython/ports/rp2
 ```
 
-Test that compiling it produces a working micropython.uf2
+Test that compiling it produces a working micropython binary:
 ```
 make clean
 make
