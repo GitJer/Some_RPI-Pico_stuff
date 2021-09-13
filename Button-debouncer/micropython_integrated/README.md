@@ -30,6 +30,8 @@ cd /YOUR_PATH/micropython/examples/usercmodule
 mkdir button_debounce
 cd button_debounce
 ```
+**asterisks** The next text isn't needed if you use the files in this github repository! Skip to Compiling
+
 Copy the cpp files to this directory. Do not forget to include the generated .pio.h file if needed:
 ```
 cp /PATH_TO_ORIGINAL_CPP_CODE/button_debounce.* .
@@ -152,6 +154,7 @@ This file now looks like:
 # Add the module.
 include(${CMAKE_CURRENT_LIST_DIR}/button_debounce/micropython.cmake)
 ```
+## Compiling
 Go to the rp2 port in the micropython directory and make with the option to include the user_c_modules:
 ```
 cd /YOUR_PATH/micropython/ports/rp2
@@ -159,7 +162,9 @@ make USER_C_MODULES=../../examples/usercmodule/micropython.cmake
 ```
 
 This should result in a firmware.uf2 that includes the button_debounce module. 
-The firmware must be uploaded to the pico (off, button pressed, on, file explorer pops up, move firmware.uf2 into it).
+
+## Running
+The firmware must be uploaded to the pico (turn off, button pressed, turn on, file explorer pops up, move firmware.uf2 into it).
 Thonny can be used to interact with micropython. 
 
 I made the following script and uploaded it to the pico:
