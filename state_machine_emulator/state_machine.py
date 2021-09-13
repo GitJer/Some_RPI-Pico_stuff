@@ -205,15 +205,15 @@ class state_machine:
                 do_jump = True
         elif jmp_condition == 2:    # x--
             if self.vars["x"] != 0:
-                self.vars["x"] -= 1
                 do_jump = True
+            self.vars["x"] = (self.vars["x"] - 1) & 0xffffffff
         elif jmp_condition == 3:    # !y
             if self.vars["y"] == 0:
                 do_jump = True
         elif jmp_condition == 4:    # y--
             if self.vars["y"] != 0:
-                self.vars["y"] -= 1
                 do_jump = True
+            self.vars["y"] = (self.vars["y"] - 1) & 0xffffffff
         elif jmp_condition == 5:    # x!=y
             if self.vars["y"] != self.vars["x"]:
                 do_jump = True
