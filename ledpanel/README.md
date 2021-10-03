@@ -12,3 +12,5 @@ The user prepares an image (variable 'image') and then encodes it to a
 version that is suitable for the pio state machine (sm) to display.
 The pio state machine (sm) continuously updates the display via direct 
 memory access (DMA).
+
+![](ledpanels.jpg)
