@@ -69,3 +69,8 @@ E.g. the LMT01 temperature sensor uses this, [see](https://www.reddit.com/r/rasp
 
 ## Read the SBUS protocol with (and without!) pio code
 The SBUS protocol is typically used in Radio Controlled cars, drones, etc. If you want to read this protocol from a RC receiver in order to manipulate the data before setting motors and servos, you can use [this code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/SBUS).
+
+## LED panel using PIO state machine and Direct Memory Access
+[This code](https://github.com/GitJer/Some_RPI-Pico_stuff/tree/main/ledpanel) shows how a pio state machine can drive led panels. It is made for
+two 64x64 led panels connected to form a 64 row x 128 column panel. There are 16 brightness levels for each Red, Green and Blue of each pixel, allowing many 
+colors. In its present form it updates the panel at about 144 Hz at standard clock settings (=125MHz.)

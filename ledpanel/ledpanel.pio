@@ -1,0 +1,36 @@
+.program ledpanel
+        ; side_set PINS: 
+        ;   MSB:    blank (0=screen on, 1=screen off)
+        ;           clock 
+        ;   LSB:    latch
+.side_set 3
+        ; I have two panels of 64 columns -> there are 128 pixels per row
+        ; output 128 address/pixel data items (set x to 127)
+    mov ISR ~NULL side 0b100
+        ; shift in 25 0s from left to right (i.e. right shift has to be set in c-program)
+    in NULL 25 side 0b100
+        ; ISR is now 127
+.wrap_target
+        ; start x at 127
+    mov x ISR side 0b000
+get_data:
+        ; set the data on the pins (autopull for 'out' is enabled)
+        ; data = 5 address bits + RGB (row) + RGB (row+32) = 11 bits
+        ; start the clock pulse, screen off (needs 2 clock cycles, determined experimentally)
+    out PINS 11 side 0b110 [2]
+        ; end clock pulse, screen off
+        ; check if all items for this row have been done
+    jmp x-- get_data side 0b100 
+        ; start the latch pulse, screen on (needs 2 clock cycles, determined experimentally)
+        ; set x to the number of delay loops = brightness level
+    out x 11 side 0b001 ; note: to not disturb the autopull the brightness level (11 bits) is set twice
+    out x 11 side 0b001
+        ; start the delay loop and end the latch pulse, screen on
+delay:
+    nop [3] side 0b000 ; note: three nops with 3 delay cycles seems sufficient for my panels
+    nop [3] side 0b000 ;       if more brightness is needed you can add more nops here, but
+    nop [3] side 0b000 ;       that will lower the update rate (now 144 Hz)
+        ; decrement x for another round of delays
+    jmp x-- delay side 0b000
+        ; the delay loop has finished: start a new row
+.wrap
