@@ -57,7 +57,7 @@ timerstop:          ; echo pulse is over (or timer has reached 0)
     mov ISR ~x      ; move the bit-inverted value of x to the ISR
     push noblock    ; push the ISR into the RX FIFO
 ```
-The `jmp x-- test` decrements x and if this does not result in a 0 in x, it jumps to testing for the stop criterion (here the Echo pin going low). If that happens, or if the x register becomes 0, the bit-inverted value of x is moved to the ISR, which makes it positive, and is then pushed to the Rx FIFO. 
+If x isn't 0, the statement `jmp x-- test` jumps to testing for the stop criterion (the Echo pin going low). If the stop criterion is true, or if the x register is 0 when arriving at the jmp statement, the bit-inverted value of x is moved to the ISR, which makes it positive, and is then pushed to the Rx FIFO. 
 
 ## Calculation of distance
 In the C/C++ code the value in the x scratch register is received. Each loop has two instructions (`jmp` with decrement, and `jmp` testing the pin) the amount of pio clock cycles becomes `2 * pio_sm_get(pio, sm)`.
