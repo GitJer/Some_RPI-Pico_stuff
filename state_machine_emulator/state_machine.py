@@ -496,13 +496,13 @@ class state_machine:
             irq = (instruction & 0x07 + self.sm_number) % 4
         else:
             irq = instruction & 0x07
-        print("c=", Clr, "Wait=", Wait, "irq=", irq)
+        # print("Clr=", Clr, "Wait=", Wait, "MSB=", MSB, "irq=", irq)
         if Clr:
             # clear the irq
             self.rp2040.PIO[0].sm_irq[irq] = 0
         elif Wait:
             # check if irq is set, if so, wait
-            if self.rp2040.PIO[0].sm_irq[irq] == 0:
+            if self.rp2040.PIO[0].sm_irq[irq] == 1:
                 self.skip_increase_pc = True
                 self.delay_delay = True
         else:

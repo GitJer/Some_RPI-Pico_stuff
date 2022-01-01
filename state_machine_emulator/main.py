@@ -130,7 +130,7 @@ if __name__ == "__main__":
         my_rp2040 = rp2040.rp2040(program_definitions)
         my_emulation = emulation.emulation(my_rp2040, pin_program, c_program)
 
-        print("Emulating ... ", end="")
+        print("Emulating ... ")
         my_emulation.emulate(500)
         print("finished")
         my_RPI_PICO_PIO_interface = RPI_PICO_PIO_interface(

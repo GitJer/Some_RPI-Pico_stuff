@@ -1,0 +1,9 @@
+# timestamp, command, arguments of command
+10, irq, 0
+12, irq, 1
+14, irq, 2
+16, irq, 3
+18, irq, 4
+20, irq, 5
+22, irq, 6
+24, irq, 7

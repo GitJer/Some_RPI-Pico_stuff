@@ -140,5 +140,17 @@ class emulation:
                         len(self.emulation_output_c_program))
                     self.emulation_output_c_program.append(str(
                         time) + " : " + "pc=" + str(self.rp2040.PIO[0].sm[0].vars["pc"]))  # TODO: only support pio0 and sm0
+                elif c[1] == 'irq':
+                    # clear the bit in c[2]. Note, it starts counting at 0 while in c++
+                    # when clearing an irq you have to set the corresponding bit with:
+                    # pio0_hw->irq = 1<<irq
+                    # so, clearing sm irq 0 requires setting bit 1.
+                    # Also note, that here all irq are visible to the c-program, normally only irq 0-3 are visible!
+                    if self.rp2040.PIO[0].sm_irq[c[2]] == 0:
+                        # if the irq bit was not set, set it
+                        self.rp2040.PIO[0].sm_irq[c[2]] = 1
+                    else:
+                        # if the irq bit was set, clear it
+                        self.rp2040.PIO[0].sm_irq[c[2]] = 0
                 else:
                     print("Error: unknown c-program statement, continuing")
