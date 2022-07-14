@@ -72,9 +72,13 @@ class emulation:
                 if 'GPIO' in g[1]:
                     gpio = int(g[1].replace('GPIO', ''))
                     self.state_machine.GPIO_data["GPIO_external"][gpio] = int(g[2])
+                    # also set the real GPIO since external always wins!
+                    self.state_machine.GPIO_data["GPIO"][gpio] = int(g[2])
                 elif 'all' in g[1]:
                     for gpio in range(32):
                         self.state_machine.GPIO_data["GPIO_external"][gpio] = int(g[2])
+                        # also set the real GPIO since external always wins!
+                        self.state_machine.GPIO_data["GPIO"][gpio] = int(g[2])
                 else:
                     # should already have been filtered out when parsing the file, but anyway:
                     warning_messages.append("Warning: unknown pin_program statement"+str(g[0])+str(g[1])+str(g[2])+"\n")

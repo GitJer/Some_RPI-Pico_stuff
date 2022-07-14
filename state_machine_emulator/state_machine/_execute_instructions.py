@@ -67,6 +67,8 @@ def execute_jmp(self, instruction):
         if self.vars["y"] != self.vars["x"]:
             do_jump = True
     elif jmp_condition == 6:    # pin
+        if self.settings["jmp_pin"] == -1:
+            self.sm_warning_messages.append("Warning: 'jmp_pin' isn't set before use in JMP instruction, continuing\n")
         if self.GPIO_data["GPIO"][self.settings["jmp_pin"]] == 1:
             do_jump = True
     elif jmp_condition == 7:    # !OSRE
@@ -91,6 +93,8 @@ def execute_wait(self, instruction):
         if self.GPIO_data["GPIO"][index] != polarity:
             is_not_met = True
     elif source == 1:           # pin
+        if self.settings["in_base"] == -1:
+            self.sm_warning_messages.append("Warning: 'in_base' isn't set before use in WAIT instruction, continuing\n")
         if self.GPIO_data["GPIO"][(self.settings["in_base"]+index) % 32] != polarity:
             is_not_met = True
     elif source == 2:           # IRQ
@@ -128,6 +132,8 @@ def execute_in(self, instruction):
     value = 0
     mask = (1 << bit_count) - 1
     if source == 0:     # PINS
+        if self.settings["in_base"] == -1:
+            self.sm_warning_messages.append("Warning: 'in_base' isn't set before use in IN instruction, continuing\n")
         for pin in range(bit_count):
             value |= (self.GPIO_data["GPIO"][(self.settings["in_base"] + pin) % 32] << pin)
     elif source == 1:   # X
@@ -204,6 +210,8 @@ def execute_out(self, instruction):
 
     # put the result in the destination
     if destination == 0:     # PINS
+        if self.settings["out_base"] == -1:
+            self.sm_warning_messages.append("Warning: 'out_base' isn't set before use in OUT instruction, continuing\n")
         for pin in range(bit_count):
             self.GPIO_data["GPIO_out"][(self.settings["out_base"] + pin) % 32] = 1 if value & (1 << pin) else 0
     elif destination == 1:   # X
@@ -213,6 +221,8 @@ def execute_out(self, instruction):
     elif destination == 3:   # NULL
         pass
     elif destination == 4:   # PINDIRS
+        if self.settings["out_base"] == -1:
+            self.sm_warning_messages.append("Warning: 'out_base' isn't set before use in OUT instruction, continuing\n")
         for pin in range(bit_count):
             self.GPIO_data["GPIO_pindirs"][(self.settings["out_base"] + pin) % 32] = 1 if value & (1 << pin) else 0
     elif destination == 5:   # PC
@@ -285,6 +295,8 @@ def execute_pull(self, instruction):
             # the same effect as MOV OSR, X"
             self.vars["OSR"] = self.vars["x"]
             self.pull_is_stalling = False
+            self.sm_warning_messages.append("Note: a non-blocking PULL on an empty FIFO has the same effect as 'MOV OSR, X', continuing\n")
+
 
 
 def execute_mov(self, instruction):
@@ -298,9 +310,15 @@ def execute_mov(self, instruction):
     value = -1
     # get the source (i.e. set 'value')
     if source == 0:     # PINS
+        if self.settings["in_base"] == -1:
+            self.sm_warning_messages.append("Warning: 'in_base' isn't set before use in MOV instruction, continuing\n")
         value = 0
         for pin in range(32):
-            value |= (self.GPIO_data["GPIO"][(self.settings["in_base"] + pin) % 32] << pin)
+            if self.GPIO_data["GPIO"][(self.settings["in_base"] + pin) % 32] == -1:
+                self.sm_warning_messages.append(str("Warning: a pin ("+str((self.settings["in_base"] + pin) % 32)+") with undefined state is read, 0 is used, continuing\n"))
+                # not necessary to 'or' value with a 0
+            else:
+                value |= (self.GPIO_data["GPIO"][(self.settings["in_base"] + pin) % 32] << pin)
     elif source == 1:   # X
         value = self.vars["x"]
     elif source == 2:   # Y
@@ -334,6 +352,10 @@ def execute_mov(self, instruction):
     # get the source (i.e. set 'value')
     # PINS TODO: check if it is correct that only out_count bits are output (not 32)
     if destination == 0:
+        if self.settings["out_base"] == -1:
+            self.sm_warning_messages.append("Warning: 'out_base' isn't set before use in MOV instruction, continuing\n")
+        if self.settings["out_count"] == -1:
+            self.sm_warning_messages.append("Warning: 'out_count' isn't set before use in MOV instruction, continuing\n")
         for pin in range(self.settings["out_count"]):
             self.GPIO_data["GPIO_out"][(self.settings["out_base"] + pin) % 32] = 1 if value & (1 << pin) else 0
             # self.set_GPIO('out', (self.settings["out_base"] + pin) % 32, value & (1 << pin))
@@ -396,7 +418,9 @@ def execute_set(self, instruction):
 
     if destination == 0:        # PINS
         if self.settings["set_base"] == -1:
-            self.sm_warning_messages.append("Warning: SET has no set_pin_base, continuing\n")
+            self.sm_warning_messages.append("Warning: 'set_base' isn't set before use in SET instruction, continuing\n")
+        if self.settings["set_count"] == -1:
+            self.sm_warning_messages.append("Warning: 'set_count' isn't set before use in SET instruction, continuing\n")
         else:
             for pin in range(self.settings["set_count"]):
                 self.GPIO_data["GPIO_set"][(self.settings["set_base"] + pin) % 32] = 1 if data & (1 << pin) else 0
@@ -406,6 +430,10 @@ def execute_set(self, instruction):
     elif destination == 2:      # Y
         self.vars["y"] = data
     elif destination == 4:      # PINDIRS
+        if self.settings["set_base"] == -1:
+            self.sm_warning_messages.append("Warning: 'set_base' isn't set before use in SET instruction, continuing\n")
+        if self.settings["set_count"] == -1:
+            self.sm_warning_messages.append("Warning: 'set_count' isn't set before use in SET instruction, continuing\n")
         for pin in range(self.settings["set_count"]):
             self.GPIO_data["GPIO_pindirs"][(self.settings["set_base"] + pin) % 32] = 1 if data & (1 << pin) else 0
     else:

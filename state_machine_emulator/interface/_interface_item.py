@@ -55,7 +55,7 @@ class Var_Bits_32(Interface_Item):
         super().__init__(frame, display_name, row, col, 45)
 
     def value_string(self, clock):
-        value_string = str(self.var[clock][self.var_index][self.var_name]) + " = "
+        value_string = str(self.var[clock][self.var_index][self.var_name] & 0xFFFFFFFF) + " = "
         value = self.var[clock][self.var_index][self.var_name]
         # extend the value_string based on bits in 'value' 
         for i in reversed(range(32)):
@@ -135,7 +135,7 @@ class Interface_Item_Listbox_Bits:
             self.value_listbox.insert("end", self.value_string(index, clock))
 
     def value_string(self, index, clock):
-        value_string = str(self.var[clock][1][self.var_name][index]) + " = "
+        value_string = str(self.var[clock][1][self.var_name][index] & 0xFFFFFFFF) + " = "
         value = self.var[clock][1][self.var_name][index]
         for i in reversed(range(32)):
             value_string += "0" if (value & (1 << i)) == 0 else "1"
