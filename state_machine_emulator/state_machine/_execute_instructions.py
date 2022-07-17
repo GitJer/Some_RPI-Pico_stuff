@@ -393,22 +393,32 @@ def execute_irq(self, instruction):
     Wait = 1 if (instruction & (1 << 5)) > 0 else 0
     MSB = 1 if (instruction & (1 << 4)) > 0 else 0
 
+    # add sm number and do modulo 4 if MSB is set
     if MSB:
         irq = (instruction & 0x07 + self.sm_number) % 4
     else:
         irq = instruction & 0x07
-    if Clr:
-        # clear the irq
-        self.sm_irq[irq] = 0
-    elif Wait:
+    
+    # the irq statement is already waiting for clearing 
+    if self.irq_is_waiting:
         # check if irq is set, if so, wait
         if self.sm_irq[irq] == 1:
             self.skip_increase_pc = True
             self.delay_delay = True
+        else:
+            self.irq_is_waiting = False
+            return
+    
+    if Clr:
+        # clear the irq
+        self.sm_irq[irq] = 0
     else:
         # set the irq
         self.sm_irq[irq] = 1
-
+        if Wait:
+            self.irq_is_waiting = True
+            self.skip_increase_pc = True
+            self.delay_delay = True
 
 def execute_set(self, instruction):
     """ execute a set instruction """

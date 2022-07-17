@@ -92,3 +92,5 @@ class state_machine:
         # flags that indicate whether the sm is waiting because either pull or push is stalling (TxFIFO empty / RxFIFO full)
         self.pull_is_stalling = False
         self.push_is_stalling = False
+        # indicates if the irq instruction is already waiting for clearing of the irq
+        self.irq_is_waiting = False
