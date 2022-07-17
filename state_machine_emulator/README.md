@@ -51,7 +51,9 @@ When working on a project, I typically have an IDE (in my case vscode) with the 
 When changing the .pio code, I use the IDE function 'build' to have pioasm generate a new .pio.h file. Then I press reLoad in the emulator, and study the emulation output.
 When changing the C/C++ code that uses the pio code, I have to decide if the c_program also needs to change. Often, this will not be the case because the c_program and pin_program act more like test cases than that they mimic the real C/C++ code or real signals applied to the pins.
 
-Note that during startup (and reLoad) there may be error messages in the terminal. These are python messages e.g. about problems reading the files. Execution warnings are presented in the 'Messages' box in the GUI, see the figure below. 
+Note that during startup (and reLoad) there may be error messages in the terminal. These are messages about e.g. problems reading the files. Execution warnings are presented in the 'Messages' box in the GUI, see the figure below. 
+
+Note that if you have more than one pio program in one file, you have to comment out everything but the one you want to test! 
 
 ## How does it work
 Using python3, after reading and parsing the input files, it emulates the sm (and the c-statements, and the externally driven GPIOs) for 500 steps, which can of course be changed in the file config.py, and stores all the state variables at each step into a variable. Then the GUI is started which allows you to step back and forth through the results.
