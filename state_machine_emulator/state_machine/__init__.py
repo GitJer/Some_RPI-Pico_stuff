@@ -4,7 +4,7 @@ class state_machine:
     """ this class emulates a state machine (sm) """
 
     from ._time_step import time_step
-    from ._push_pull import push_to_RxFIFO, pull_from_TxFIFO, do_auto_push_pull
+    from ._push_pull import push_to_RxFIFO, pull_from_TxFIFO
     from ._do_sideset import do_sideset
     from ._set_all_GPIO import set_all_GPIO
     from ._execute_instructions import execute_instruction, execute_jmp, execute_wait, execute_in, execute_out, execute_push, execute_pull, execute_mov, execute_irq, execute_set
@@ -55,7 +55,7 @@ class state_machine:
         self.vars["ISR"] = 0
         self.vars["ISR_shift_counter"] = 0
         self.vars["OSR"] = 0
-        self.vars["OSR_shift_counter"] = 0
+        self.vars["OSR_shift_counter"] = 32
         self.vars["pc"] = -1 # before executing any instruction a '+= 1' is done in time_step()
         self.vars["delay"] = 0
         self.vars["status"] = -1

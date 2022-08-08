@@ -26,3 +26,4 @@ def do_sideset(self, instruction_delay_sideset):
                 self.GPIO_data["GPIO_pindirs"][(self.settings["sideset_base"] + i) % 32] = value
             else:
                 self.GPIO_data["GPIO_sideset"][(self.settings["sideset_base"] + i) % 32] = value
+    self.set_all_GPIO() # TODO: is this correct? the datasheet says that the sideset is done before the instruction.

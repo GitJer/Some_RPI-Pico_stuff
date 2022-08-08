@@ -1,0 +1,39 @@
+0, out_shift_right, True
+0, out_shift_autopull, True
+0, pull_threshold, 10
+0, in_shift_right, False
+0, in_shift_autopush, True
+0, push_threshold, 3
+20, put, 31
+30, get
+31, get
+40, put, 63
+50, get
+51, get
+60, put, 95
+70, get
+71, get
+80, put, 127
+90, get
+91, get
+100, put, 159
+105, get
+106, get
+110, put, 191
+115, get
+116, get
+120, put, 223
+125, get
+126, get
+140, put, 225
+145, get
+146, get
+160, put, 287
+165, get
+166, get
+180, put, 319
+185, get
+186, get
+200, put, 351
+205, get
+206, get

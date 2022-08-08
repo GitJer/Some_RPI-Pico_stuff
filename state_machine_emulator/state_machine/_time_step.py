@@ -30,9 +30,8 @@ def time_step(self):
                 self.vars["pc"] = self.wrap_target
         # get the new instruction and execute it
         instruction = int(self.program[self.vars["pc"]][0], 16)
+        # execute the instruction
         self.execute_instruction(instruction)
-        # take care of auto push and pull
-        self.do_auto_push_pull()
         # set the 'status' depending on RxFIFO or TxFIFO count
         if self.settings['status_sel'] == 0:
             # check TxFIFO level

@@ -22,28 +22,3 @@ def pull_from_TxFIFO(self):
     self.vars["TxFIFO_count"] -= 1
     # the number of bits shifted out of the OSR is 0
     self.vars["OSR_shift_counter"] = 0
-
-
-def do_auto_push_pull(self):
-    """ take care of the auto push and pull """
-    # do auto push
-    if self.settings["in_shift_autopush"] and (self.vars["ISR_shift_counter"] >= self.settings["push_threshold"]):
-        if self.vars["RxFIFO_count"] < 4:
-            self.push_to_RxFIFO()
-            self.push_is_stalling = False
-        else:
-            # block: do not go to next instruction
-            self.skip_increase_pc = True
-            self.delay_delay = True
-            self.push_is_stalling = True
-    # do auto pull
-    # TODO: check if this adheres to section 3.5.4.2
-    if self.settings["out_shift_autopull"] and (self.vars["OSR_shift_counter"] >= self.settings["pull_threshold"]):
-        if self.vars["TxFIFO_count"] > 0:
-            self.pull_from_TxFIFO()
-            self.pull_is_stalling = False
-        else:
-            # block: do not go to next instruction
-            self.skip_increase_pc = True
-            self.delay_delay = True
-            self.pull_is_stalling = True

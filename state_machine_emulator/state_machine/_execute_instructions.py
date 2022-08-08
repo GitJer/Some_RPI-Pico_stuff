@@ -36,6 +36,12 @@ def execute_instruction(self, instruction):
     else:                                       # its an error!
         self.sm_warning_messages.append("Warning: unknown instruction, continuing\n")
 
+    # when not pull or mov, do autopull (if enabled) (datasheet 3.5.4):
+    if self.settings["out_shift_autopull"] and not ((instruction_type == 4 and is_pull) or (instruction_type == 5)):
+        if self.vars["OSR_shift_counter"] >= self.settings["pull_threshold"]:
+            if self.vars["TxFIFO_count"] > 0:
+                self.pull_from_TxFIFO()
+                self.pull_is_stalling = False
 
 
 def execute_jmp(self, instruction):
@@ -131,6 +137,8 @@ def execute_in(self, instruction):
         bit_count = 32
     value = 0
     mask = (1 << bit_count) - 1
+
+    # get data from the source
     if source == 0:     # PINS
         if self.settings["in_base"] == -1:
             self.sm_warning_messages.append("Warning: 'in_base' isn't set before use in IN instruction, continuing\n")
@@ -155,7 +163,8 @@ def execute_in(self, instruction):
     else:               # Error
         self.sm_warning_messages.append("Warning: IN has unknown source, continuing\n")
         return
-    # shift into ISR
+
+    # shift data into the ISR
     if self.settings["in_shift_right"]:  # shift right
         self.vars["ISR"] >>= bit_count
         self.vars["ISR"] |= value << (32-bit_count)
@@ -166,18 +175,35 @@ def execute_in(self, instruction):
     self.vars["ISR"] &= 0xFFFFFFFF
     # adjust the shift counter
     self.vars["ISR_shift_counter"] += bit_count
+    if (self.vars["ISR_shift_counter"]) > 32:
+        self.vars["ISR_shift_counter"] = 32
 
+    # (if enabled) autopush or stall
+    if self.settings["in_shift_autopush"] and (self.vars["ISR_shift_counter"] >= self.settings["push_threshold"]):
+        if self.vars["RxFIFO_count"] < 4:
+            self.push_to_RxFIFO()
+            self.push_is_stalling = False
+        else:
+            # block: do not go to next instruction
+            self.skip_increase_pc = True
+            self.delay_delay = True
+            self.push_is_stalling = True
 
 def execute_out(self, instruction):
-    # print("execute_out")
     """ execute an out instruction """
 
-    # rp2040-datasheet.pdf 3.2.4 Stalling: An OUT instruction when autopull is enabled, OSR has reached its shift threshold, and the TX FIFO is empty
-
-    if self.pull_is_stalling:
-        self.sm_warning_messages.append("Warning: pull is stalling in OUT\n")
-        return
-
+    # do autopull (datasheet 3.5.4):
+    if self.settings["out_shift_autopull"]:
+        if self.vars["OSR_shift_counter"] >= self.settings["pull_threshold"]:
+            if self.vars["TxFIFO_count"] > 0:
+                self.pull_from_TxFIFO()
+            # stall
+            self.skip_increase_pc = True
+            self.delay_delay = True
+            self.pull_is_stalling = True
+            self.sm_warning_messages.append("Warning: pull is stalling in OUT\n")
+            return
+    
     # get instruction parameters
     destination = (instruction & 0x00E0) >> 5
     bit_count = instruction & 0x001F
@@ -185,14 +211,14 @@ def execute_out(self, instruction):
     if bit_count == 0:
         bit_count = 32
 
-    # shift to the left
+    # shift to the right
     if self.settings["out_shift_right"]:
         # take the bit_count LSB
         mask = (1 << bit_count)-1
         value = self.vars["OSR"] & mask
         # shift the OSR bit_count to the right
         self.vars["OSR"] >>= bit_count
-    else:   # shift to the right
+    else:   # shift to the left
         # take the bit_count MSB by making a mask and shifting it left
         mask = (1 << bit_count)-1
         # shift them (32-bit_count) to the left
@@ -239,6 +265,10 @@ def execute_out(self, instruction):
     else:                   # Error
         self.sm_warning_messages.append("Warning: OUT has unknown destination, continuing\n")
         return
+
+
+
+
 
 
 def execute_push(self, instruction):

@@ -1,11 +1,12 @@
 """
 TODO:
 - check the 'status' with 'set_N' and 'status_sel' with the actual hardware!
-    Wait! not just the status, but many, many things should be tested with the pico HW
+    Wait! not just the status, but many, many things should be tested with the pico hardware
 - "FIFO IRQs" Figure 38. in rp2040-datasheet.pdf
 - start without c-program or pin-program
 - try except around emulation
-- why does the stepper example (with unnecessary sideset) cause the sideset output to toggle?
+- make the way statements in c_program are made exactly the same as how they appear in the GUI
+- use the pio assembler to read raw programs and compile them (i.e. read prog.pio instead of prog.pio.h)
 """
 
 from sys import argv, exc_info
@@ -14,7 +15,7 @@ from glob import glob
 
 from interface import Emulator_Interface
 from emulation import emulation
-from config import EMULATION_STEPS
+from config import EMULATION_STEPS, SAVE_TEST_DATA
 from state_machine import state_machine
 
 """
@@ -121,15 +122,15 @@ def process_file_c_program(filename, c_program):
                     parts = line.strip().split(',')
                     parts[1] = parts[1].strip()
                     # check if the command is valid 
-                    if parts[1].strip() in ['put', 'get', 'set_base', 'set_count', 'in_base', 'jmp_pin', 'sideset_base', 'sideset_count', 'sideset_opt', 'sideset_pindirs', 'out_base', 'out_count', 'out_shift_right', 'out_shift_autopull', 'pull_threshold', 'in_shift_right', 'in_shift_autopush', 'push_threshold', 'get_pc', 'set_pc', 'irq', 'set_N', 'status_sel', 'dir_out', 'dir_in', 'dir_non']:
+                    if parts[1].strip() in ['put', 'get', 'set_base', 'set_count', 'in_base', 'jmp_pin', 'sideset_base', 'out_base', 'out_count', 'out_shift_right', 'out_shift_autopull', 'pull_threshold', 'in_shift_right', 'in_shift_autopush', 'push_threshold', 'get_pc', 'set_pc', 'irq', 'set_N', 'status_sel', 'dir_out', 'dir_in', 'dir_non']:
                         parts[0] = int(parts[0])
                         parts[1] = parts[1]
                         if len(parts) == 3:
                             parts[2] = parts[2].strip()
                             # convert strings "True" and "False" to boolean, otherwise it is an int
-                            if parts[2] == "True":
+                            if parts[2] in ["True", "true", "Yes", "yes"]:
                                 parts[2] = True
-                            elif parts[2] == "False":
+                            elif parts[2] in ["False", "false", "No", "no"]:
                                 parts[2] = False
                             else:
                                 parts[2] = int(parts[2])
@@ -211,8 +212,20 @@ if __name__ == "__main__":
         # do the emulation
         my_emulation.emulate(EMULATION_STEPS)
         
-        # show the interface
-        my_Emulator_Interface = Emulator_Interface(program_definitions, pin_program, c_program, my_emulation.output, my_emulation.emulation_output_c_program)
+        if SAVE_TEST_DATA:
+            print("program_definitions:")
+            print(program_definitions)
+            print("pin_program:")
+            print(pin_program)
+            print("c_program:")
+            print(c_program)
+            print("my_emulation.output:")
+            print(my_emulation.output)
+            print("my_emulation.emulation_output_c_program:")
+            print(my_emulation.emulation_output_c_program)
+        else:
+            # show the interface
+            my_Emulator_Interface = Emulator_Interface(program_definitions, pin_program, c_program, my_emulation.output, my_emulation.emulation_output_c_program)
 
-        # check if a reload was requested
-        load_files = my_Emulator_Interface.get_reload_flag()
+            # check if a reload was requested
+            load_files = my_Emulator_Interface.get_reload_flag()

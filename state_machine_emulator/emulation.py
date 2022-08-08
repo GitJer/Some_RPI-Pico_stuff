@@ -171,9 +171,10 @@ class emulation:
         if self.state_machine.settings["set_base"] != -1 and self.state_machine.settings["set_count"] != 0:
             for i in range(self.state_machine.settings["set_base"], self.state_machine.settings["set_base"] + self.state_machine.settings["set_count"]):
                 self.state_machine.GPIO_data["GPIO_pindirs"][i] = 0 # indicate this pin is an output
-        # if sideset_base and sideset_count are set, then make the associated pin an output in GPIO_pindirs
+        # if sideset_base and sideset_count are set, then make the associated pin(s) an output in GPIO_pindirs
         if self.state_machine.settings["sideset_base"] != -1 and self.state_machine.settings["sideset_count"] != 0:
-            for i in range(self.state_machine.settings["sideset_base"], self.state_machine.settings["sideset_base"] + self.state_machine.settings["sideset_count"]):
+            num_of_bits = self.state_machine.settings["sideset_count"] - 1 if self.state_machine.settings["sideset_opt"] else 0
+            for i in range(self.state_machine.settings["sideset_base"], self.state_machine.settings["sideset_base"] + num_of_bits):
                 self.state_machine.GPIO_data["GPIO_pindirs"][i] = 0 # indicate this pin is an output
 
         return warning_messages
