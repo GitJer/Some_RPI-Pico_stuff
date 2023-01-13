@@ -10,7 +10,7 @@
 ;    loop: 
 ;       decrement y timer
 ;       test for falling edge 
-;    y timer value is the pulse width (actually, (0xFFFFFFFF - x)*2/125MHz is the pulse width)
+;    y timer value is the pulse width (actually, (0xFFFFFFFF - y)*2/125MHz is the pulse width)
 ;    loop:
 ;       test for rising edge
 ;       decrement x timer
@@ -33,7 +33,7 @@ timer_lp:               ; loop for low period
     jmp x-- timer_lp    ; if not: count down
     jmp start           ; timer has reached 0, stop count down of low period, restart
 timerstop:
-    mov ISR ~y          ; move the value ~y to the ISR: the high period (pulsewidth) (0xFFFFFFFF-x)
+    mov ISR ~y          ; move the value ~y to the ISR: the high period (pulsewidth) (0xFFFFFFFF-y)
     push noblock        ; push the ISR into the Rx FIFO
     mov ISR ~x          ; move the value ~x to the ISR: the low period (0xFFFFFFFF-x)
     push noblock        ; push the ISR into the Rx FIFO
