@@ -23,7 +23,7 @@ In pseudo-code the algorithm is as follows:
         loop: 
            decrement y timer
            test for falling edge 
-        y timer value is the pulse width (actually, (0xFFFFFFFF - x)*2/125MHz is the pulse width)
+        y timer value is the pulse width (actually, (0xFFFFFFFF - y)*2/125MHz is the pulse width)
         loop:
            test for rising edge
            decrement x timer
